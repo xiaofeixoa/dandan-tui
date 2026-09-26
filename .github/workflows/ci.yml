@@ -89,9 +89,135 @@ jobs:
       - name: unittest tests.test_singbox_manager
         shell: bash
         run: python -m unittest tests.test_singbox_manager -v
-      - name: unittest tests.test_smoke.ConfigSmokeTests
+      - name: C/test_config_shape_and_unique_action_ids
         shell: bash
-        run: python -m unittest tests.test_smoke.ConfigSmokeTests -v
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_config_shape_and_unique_action_ids -v
+      - name: C/test_kernel_categories_and_action_migration
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_kernel_categories_and_action_migration -v
+      - name: C/test_grub_maintenance_uses_discovered_entries_and_never_reboots
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_grub_maintenance_uses_discovered_entries_and_never_reboots -v
+      - name: C/test_system_kernel_upstream_paths_are_owned_and_verified
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_system_kernel_upstream_paths_are_owned_and_verified -v
+      - name: C/test_kernel_source_builder_is_local_hardened_and_launcher_cached
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_kernel_source_builder_is_local_hardened_and_launcher_cached -v
+      - name: C/test_launch_manifest_covers_every_downloaded_file
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_launch_manifest_covers_every_downloaded_file -v
+      - name: C/test_launcher_ships_every_local_script_action
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_launcher_ships_every_local_script_action -v
+      - name: C/test_launcher_ships_every_yjl_tui_module
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_launcher_ships_every_yjl_tui_module -v
+      - name: C/test_launcher_verifies_downloads_with_sha256sums
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_launcher_verifies_downloads_with_sha256sums -v
+      - name: C/test_doctor_and_version_flags_are_wired
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_doctor_and_version_flags_are_wired -v
+      - name: C/test_dangerous_builtins_require_explicit_confirmation
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_dangerous_builtins_require_explicit_confirmation -v
+      - name: C/test_source_builder_never_accepts_an_external_build_directory_or_old_gpgv2
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_source_builder_never_accepts_an_external_build_directory_or_old_gpgv2 -v
+      - name: C/test_fixed_online_endpoints_and_local_warp_snapshot
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_fixed_online_endpoints_and_local_warp_snapshot -v
+      - name: C/test_launcher_downloads_nginx_module
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_launcher_downloads_nginx_module -v
+      - name: C/test_each_action_has_dispatch_or_supported_kind
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_each_action_has_dispatch_or_supported_kind -v
+      - name: C/test_nginx_parser_and_validation
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_nginx_parser_and_validation -v
+      - name: C/test_static_site_template_and_root_validation
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_static_site_template_and_root_validation -v
+      - name: C/test_nginx_ui_is_lazy_user_repo_action
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_nginx_ui_is_lazy_user_repo_action -v
+      - name: C/test_nodeseek_collection_category
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_nodeseek_collection_category -v
+      - name: C/test_online_actions_declare_interaction_model
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_online_actions_declare_interaction_model -v
+      - name: C/test_no_runtime_urls_point_to_dandan8511
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_no_runtime_urls_point_to_dandan8511 -v
+      - name: C/test_nginx_stages_an_included_conf_before_replacing
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_nginx_stages_an_included_conf_before_replacing -v
+      - name: C/test_tcp_brutal_is_first_local_action
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_is_first_local_action -v
+      - name: C/test_tcp_brutal_category_has_install_and_manage_actions
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_category_has_install_and_manage_actions -v
+      - name: C/test_tcp_brutal_manager_validates_and_normalizes_ipv4_prefixes
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_manager_validates_and_normalizes_ipv4_prefixes -v
+      - name: C/test_tcp_brutal_online_cleanup_keeps_installer_in_function_scope
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_online_cleanup_keeps_installer_in_function_scope -v
+      - name: C/test_launcher_caches_tcp_brutal_offline_runtime_assets
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_launcher_caches_tcp_brutal_offline_runtime_assets -v
+      - name: C/test_tcpfit_is_vendored_tcp_menu_entry
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcpfit_is_vendored_tcp_menu_entry -v
+      - name: C/test_nodeseek_menu_actions
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_nodeseek_menu_actions -v
+      - name: C/test_fscarmen_singbox_full_local_clone
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_fscarmen_singbox_full_local_clone -v
+      - name: C/test_fscarmen_tcp_brutal_menu9_is_local_clone
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_fscarmen_tcp_brutal_menu9_is_local_clone -v
+      - name: C/test_geosite_update_is_a_vendored_fscarmen_action
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_geosite_update_is_a_vendored_fscarmen_action -v
+      - name: C/test_geosite_vendor_snapshot_has_a_complete_manifest
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_geosite_vendor_snapshot_has_a_complete_manifest -v
+      - name: C/test_launcher_downloads_geosite_update_files
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_launcher_downloads_geosite_update_files -v
+      - name: C/test_singbox_manager_is_a_cached_local_action
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_singbox_manager_is_a_cached_local_action -v
+      - name: C/test_fscarmen_warp_local_clone_updates_from_this_repository
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_fscarmen_warp_local_clone_updates_from_this_repository -v
+      - name: C/test_docker_mirror_switch_is_local_docker_menu_entry
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_docker_mirror_switch_is_local_docker_menu_entry -v
+      - name: C/test_dockerhub_mirror_management_contract
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_dockerhub_mirror_management_contract -v
+      - name: C/test_nft_forward_is_vendored_advanced_menu_entry
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_nft_forward_is_vendored_advanced_menu_entry -v
+      - name: C/test_lscpu_parser_and_cpu_profile_fields
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_lscpu_parser_and_cpu_profile_fields -v
+      - name: C/test_yjl_argo_is_local_advanced_menu_entry_and_launcher_cached
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_yjl_argo_is_local_advanced_menu_entry_and_launcher_cached -v
+      - name: C/test_virtualization_profile_has_detection_and_dmi_fields
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_virtualization_profile_has_detection_and_dmi_fields -v
+      - name: C/test_tcp_brutal_repair_only_targets_supported_nodes
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_repair_only_targets_supported_nodes -v
       - name: unittest tests.test_smoke.LocalBehaviorTests
         shell: bash
         run: python -m unittest tests.test_smoke.LocalBehaviorTests -v
