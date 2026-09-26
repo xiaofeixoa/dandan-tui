@@ -538,8 +538,8 @@ do_update() {
 
   # ---- health-check 10 秒预算 ----
   note "[5/5] health-check (10s) ..."
-  local i ok_count=0
-  for i in $(seq 1 10); do
+  local ok_count=0
+  for _ in $(seq 1 10); do
     if systemctl is-active --quiet nft-forward-daemon.service \
        && curl -sf --unix-socket /var/run/nft-forward.sock \
                http://daemon/v1/health 2>/dev/null \

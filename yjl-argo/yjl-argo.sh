@@ -431,7 +431,7 @@ status() {
   fi
   if [[ "$MODE" == 'quick' ]]; then
     url=$(discover_quick_url)
-    [[ -n "$url" ]] && say "临时域名：${url}" || warn '日志中还没有发现 trycloudflare 临时域名。'
+    if [[ -n "$url" ]]; then say "临时域名：${url}"; else warn '日志中还没有发现 trycloudflare 临时域名。'; fi
   elif [[ "$MODE" == 'token' ]]; then
     say '命名隧道：Token 已保存（不会在菜单中显示）。'
     if [[ -n "$PUBLIC_HOSTNAME" ]]; then
@@ -593,7 +593,7 @@ configure_tunnel() {
   if [[ "$MODE" == quick ]]; then
     local url
     url=$(discover_quick_url)
-    [[ -n "$url" ]] && ok "临时隧道已创建：${url}" || warn '隧道正在建立，请稍后从“查看状态”或“查看日志”读取临时域名。'
+    if [[ -n "$url" ]]; then ok "临时隧道已创建：${url}"; else warn '隧道正在建立，请稍后从“查看状态”或“查看日志”读取临时域名。'; fi
   else
     ok '命名隧道已启动。请在 Cloudflare Dashboard 的 Public Hostname / 路由规则中将服务地址设为上方“本地目标”；Dashboard 的远端规则会优先于 --url。'
   fi

@@ -172,6 +172,7 @@ read_policy() {
   POLICY_EXPIRE_DAYS=0
   [[ -f "$POLICY_FILE" ]] || return 0
   # The policy file is generated locally and has only these two integer fields.
+  # shellcheck source=/dev/null
   source "$POLICY_FILE"
   [[ "${POLICY_MAX_BYTES:-}" =~ ^[0-9]+$ ]] || POLICY_MAX_BYTES=0
   [[ "${POLICY_EXPIRE_DAYS:-}" =~ ^[0-9]+$ ]] || POLICY_EXPIRE_DAYS=0

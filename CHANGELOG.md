@@ -66,7 +66,8 @@
   `--list` 按分类分组输出；pyflakes 静态清扫（无占位符 f-string、未用导入等）。
 - 新增 `yjl-tui --doctor` 自诊断（Python 版本、配置完整性、local_script 存在性、launch 清单新鲜度、
   依赖命令、目录可写性）与 `--version`；`--check` 输出版本号。
-- 新增 GitHub Actions CI（unittest + 全量 `bash -n` + 清单新鲜度）。
+- 新增 GitHub Actions CI（unittest + 全量 `bash -n` + 清单新鲜度 + Windows 平台回归 +
+  shellcheck），自维护脚本全部通过 shellcheck 零告警（vendored 快照按惯例豁免）。
 - 新增 `tests/test_doctor.py`、`tests/test_yjl_tui.py`、`tests/test_nginx_manager.py`
   （分发注册表、助手语义、nginx 解析与写入守卫），套件 66 → 98 项。
 - 在真实 Debian 13 VPS 上全量验证：97 项单测（当时）、`--doctor` root 环境 0 败 0 警、

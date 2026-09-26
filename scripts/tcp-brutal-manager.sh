@@ -58,7 +58,7 @@ show_local_addresses() {
     addresses="$(ip -o -4 addr show scope global 2>/dev/null | awk '{print $4}' || true)"
     if [ -n "$addresses" ]; then
         note "本机全局 IPv4："
-        printf '  %s\n' $addresses
+        for addr in $addresses; do printf '  %s\n' "$addr"; done
     else
         note "未从 ip 命令发现全局 IPv4；请按实际客户端或对端地址填写目标。"
     fi
@@ -79,6 +79,7 @@ has_usable_target_route() {
 init_system() {
     local distro_id=""
     if [ -r /etc/os-release ]; then
+        # shellcheck disable=SC1091
         distro_id="$(. /etc/os-release; printf '%s' "${ID:-}")"
     fi
     if [ "$distro_id" = "alpine" ] || { command -v rc-service >/dev/null 2>&1 && [ ! -d /run/systemd/system ]; }; then
@@ -93,6 +94,7 @@ init_system() {
 prepare_alpine_build_dependencies() {
     local distro_id=""
     if [ -r /etc/os-release ]; then
+        # shellcheck disable=SC1091
         distro_id="$(. /etc/os-release; printf '%s' "${ID:-}")"
     fi
     [ "$distro_id" = "alpine" ] || return 0
@@ -231,7 +233,12 @@ add_rule() {
 
 list_rules() {
     show_local_addresses
-    [ -f "$RULES_FILE" ] && { note "已保存、将在重启后恢复的规则："; sed 's/^/  /' "$RULES_FILE"; } || note "尚未保存持久化规则。"
+    if [ -f "$RULES_FILE" ]; then
+        note "已保存、将在重启后恢复的规则："
+        sed 's/^/  /' "$RULES_FILE"
+    else
+        note "尚未保存持久化规则。"
+    fi
     if [ -x "$BRUTALCTL" ]; then
         note "当前已加载的 TCP Brutal 规则："
         "$BRUTALCTL" list || true
