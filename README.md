@@ -386,6 +386,12 @@ IP 质量、测速、回程路由、SWAP/Fail2ban、Python/realm/gost/哪吒/Arg
   Windows/CentOS/RockyLinux/AlmaLinux，moeclub 支持 Debian/Ubuntu/CentOS）、输入新密码
   （getpass 不回显）和 SSH 端口，汇总展示（密码打码）后输入 `DD` 才开始重装；
   fcurrk 直接进入其自带交互菜单。
+- 全部在线动作已声明交互形态并通过守门测试：自带菜单（哪吒面板引导、realm、gost、
+  PVE、Argo、宝塔、233boy、融合怪等）、一键自动安装（Docker、chsrc、BBR v3 别名、
+  lazydocker）、直跑检测/测速（bench、yabs、nws、回程等）、固定参数变体（yabs GB5、
+  LemonBench --fast、speedtest --simple 等），需要参数的（哪吒 agent）有 `prompt_args`
+  输入提示。新增在线动作时必须在
+  `tests/test_smoke.py::test_online_actions_declare_interaction_model` 登记交互形态。
 
 ## 维护与开发
 

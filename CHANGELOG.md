@@ -45,6 +45,9 @@
   运行时不再调用 `dandan8511` 的任何工程；新增守门测试断言运行时文件无旧仓库 URL。
 - online 动作支持 `prompt_args` 执行前参数输入（shlex 解析、支持引号；留空/解析失败
   回退为无参数运行）。
+- 全量审计 62 个 online 动作的交互形态（59 个脚本自动分类 + 4 个存疑项人工核实）：
+  哪吒补 `prompt_args`（agent 交互安装入口）、chsrc 描述澄清；新增
+  `test_online_actions_declare_interaction_model` 守门测试，未声明交互形态的新动作会被 CI 拒绝。
 - DD 重装改为交互式向导：分步选择目标系统/版本（leitbogioro 支持 Debian/Ubuntu/
   Windows/CentOS/RockyLinux/AlmaLinux，moeclub 支持 Debian/Ubuntu/CentOS）、新密码
   getpass 输入、SSH 端口与 -firmware 选项；汇总预览（密码打码）后需输入 `DD` 才开始，
@@ -56,7 +59,7 @@
   直接从本地工程目录复制全部文件（不访问网络），SHA256SUMS 校验照常执行——用于 GitHub
   不可达或完全离线的 VPS。
 - 新增 `tests/test_launch_e2e.py`：launch.sh 全链路端到端测试（本机 HTTP 真实下载 /
-  离线目录 / 缺文件拒绝三场景），部署级回归有了守门测试，套件 98 → 103 项。
+  离线目录 / 缺文件拒绝三场景），部署级回归有了守门测试，套件 98 → 112 项。
 - curses 初始化失败（TERM 异常等）改为友好报错退出；singbox_manager 交互循环不再被
   磁盘/命令层的意外异常带走。
 - `launch.sh` 对 `YJL_TUI_REF` 做合法性校验（只允许 ref 字符），杜绝拼进 URL 的畸形值；

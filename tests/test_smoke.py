@@ -262,6 +262,43 @@ class ConfigSmokeTests(unittest.TestCase):
         self.assertEqual(dd["ns_dd_moeclub"]["dd_variant"], "moeclub")
         self.assertNotIn("prompt_args", dd["ns_dd_fcurrk"])
 
+    def test_online_actions_declare_interaction_model(self):
+        """每个 online 动作必须声明交互形态之一（2026-09-26 全量审计的固化）：
+
+        - mode 向导（dd / fnm）
+        - prompt_args 参数输入提示
+        - args 固定参数变体
+        - 脚本自身交互（菜单/向导）或一键自动安装、直跑检测 —— 在 SELF_INTERACTIVE 白名单
+        """
+        self_interactive = {
+            # 脚本自带交互菜单
+            "miaomiaowu", "three_x_ui", "dd_reinstall", "singbox_233", "singbox_menu", "xray_233",
+            "swap_online", "bt_panel", "onepanel", "casaos", "tcp_brutal",
+            "nodeseek_tcp_multifunction", "nodeseek_tcpx", "port_traffic_dog",
+            "ns_dd_fcurrk", "ns_ecs", "ns_gost", "ns_aurora", "ns_pve", "ns_argox",
+            "ns_kejilion", "ns_skybox", "ns_tcp_bbr_menu", "ns_fail2ban", "ns_baota",
+            "ns_dufu_aniverse", "ns_autotrace", "ns_media_native", "ns_ip_quality",
+            "ns_region_check", "ns_nws", "ns_taier", "ns_tcp_quality", "ns_swap", "ns_pyinstall",
+            # 一键自动安装（无需交互）
+            "docker", "chsrc", "ns_bbr_v3", "lazydocker_install",
+            # 直接运行的检测 / 测速
+            "ns_bench", "bench_speed", "ecs", "ns_nodebench", "ns_yabs",
+            "ns_media_check", "ns_sick", "ns_backtrace", "ns_speedtest",
+        }
+        missing = []
+        for action in self.config["actions"]:
+            if action.get("kind") != "online":
+                continue
+            if action.get("mode") or action.get("prompt_args") or action.get("args"):
+                continue
+            if action["id"] not in self_interactive:
+                missing.append(action["id"])
+        self.assertEqual(missing, [])
+        # 白名单内的动作必须真实存在，防止清单腐化。
+        online_ids = {action["id"] for action in self.config["actions"] if action.get("kind") == "online"}
+        stale = self_interactive - online_ids
+        self.assertEqual(stale, set())
+
     def test_no_runtime_urls_point_to_dandan8511(self):
         # 仓库迁移守门：运行时会访问的文件一律不得再指向 dandan8511。
         # （nginx-ui 镜像仓库 dandan8511/nginx-ui 属另一项目，如需迁移见 README。）
