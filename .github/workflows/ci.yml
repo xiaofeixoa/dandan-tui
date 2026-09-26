@@ -67,9 +67,33 @@ jobs:
       - name: unittest tests.test_doctor
         shell: bash
         run: python -m unittest tests.test_doctor -v
-      - name: unittest tests.test_yjl_tui.DispatchTests
+      - name: DispatchTests.test_exit_kind_sets_should_exit_without_pause
         shell: bash
-        run: python -m unittest tests.test_yjl_tui.DispatchTests -v
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_exit_kind_sets_should_exit_without_pause -v
+      - name: DispatchTests.test_unknown_builtin_returns_1_with_message
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_unknown_builtin_returns_1_with_message -v
+      - name: DispatchTests.test_builtin_fallback_runs_interactive
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_builtin_fallback_runs_interactive -v
+      - name: DispatchTests.test_handler_registry_routes_and_pauses_once
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_handler_registry_routes_and_pauses_once -v
+      - name: DispatchTests.test_tcp_profile_routes_to_apply
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_tcp_profile_routes_to_apply -v
+      - name: DispatchTests.test_local_script_chains_repair_for_tcp_brutal_install
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_local_script_chains_repair_for_tcp_brutal_install -v
+      - name: DispatchTests.test_local_script_success_without_install_id_skips_repair
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_local_script_success_without_install_id_skips_repair -v
+      - name: DispatchTests.test_execute_root_gate_reports_and_pauses
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_execute_root_gate_reports_and_pauses -v
+      - name: DispatchTests.test_execute_cancelled_by_confirm
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_execute_cancelled_by_confirm -v
       - name: unittest tests.test_yjl_tui.HelperTests
         shell: bash
         run: python -m unittest tests.test_yjl_tui.HelperTests -v
