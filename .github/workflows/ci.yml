@@ -74,8 +74,6 @@ jobs:
       - name: unittest tests.test_yjl_tui.DispatchTests
         shell: bash
         run: python -m unittest tests.test_yjl_tui.DispatchTests -v
-        shell: bash
-        run: python -m unittest tests.test_yjl_tui.DispatchTests.test_execute_cancelled_by_confirm -v
       - name: unittest tests.test_yjl_tui.HelperTests
         shell: bash
         run: python -m unittest tests.test_yjl_tui.HelperTests -v
