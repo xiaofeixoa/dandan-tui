@@ -163,7 +163,13 @@ jobs:
         run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_category_has_install_and_manage_actions -v
       - name: C/test_tcp_brutal_manager_validates_and_normalizes_ipv4_prefixes
         shell: bash
-        run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_manager_validates_and_normalizes_ipv4_prefixes -v
+        run: |
+          python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_manager_validates_and_normalizes_ipv4_prefixes -v 2>&1 | tee "$RUNNER_TEMP/t.out"
+          if ! grep -q "^OK" "$RUNNER_TEMP/t.out"; then
+            echo "::error::tcp-brutal validate test failed on windows runner"
+            grep -E "Error|error|assert|Traceback" -A4 "$RUNNER_TEMP/t.out" | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          fi
       - name: C/test_tcp_brutal_online_cleanup_keeps_installer_in_function_scope
         shell: bash
         run: python -m unittest tests.test_smoke.ConfigSmokeTests.test_tcp_brutal_online_cleanup_keeps_installer_in_function_scope -v
