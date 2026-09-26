@@ -50,24 +50,24 @@
 
 本地运行时，所有 `local_script` 动作都直接使用本工程文件。`sing-box(fsr)` 与 `WARP 管理菜单（本地克隆）`分别使用 `scripts/fscarmen-sing-box.sh`、`scripts/fscarmen-warp.sh`，不需要从 fscarmen 下载入口脚本。涉及安装、网络、内核、服务、证书或防火墙的动作应以 root 运行；fscarmen 菜单后续下载依赖时仍需要网络。
 
-GitHub 仓库：`https://github.com/dandan8511/dandan-tui`
+GitHub 仓库：`https://github.com/xiaofeixoa/dandan-tui`
 
 VPS 一行启动：
 
 ```bash
-bash <(curl -fsSL "https://raw.githubusercontent.com/dandan8511/dandan-tui/main/launch.sh?v=$(date +%s)")
+bash <(curl -fsSL "https://raw.githubusercontent.com/xiaofeixoa/dandan-tui/main/launch.sh?v=$(date +%s)")
 ```
 
 只有 wget 时：
 
 ```bash
-bash <(wget -qO- "https://raw.githubusercontent.com/dandan8511/dandan-tui/main/launch.sh?v=$(date +%s)")
+bash <(wget -qO- "https://raw.githubusercontent.com/xiaofeixoa/dandan-tui/main/launch.sh?v=$(date +%s)")
 ```
 
 `launch.sh` 从 `main` 下载 TUI 本体、`yjl_tui/` 模块、菜单配置、本地脚本与各工具快照到 `${XDG_CACHE_HOME:-~/.cache}/dandan-tui`，下载完成后用仓库根目录的 `SHA256SUMS` 逐项校验，再以「staging 目录组装 + 整体替换」的方式原子升级缓存目录，最后启动。要固定某个版本：
 
 ```bash
-YJL_TUI_REF=提交SHA bash <(curl -fsSL "https://raw.githubusercontent.com/dandan8511/dandan-tui/main/launch.sh?v=$(date +%s)")
+YJL_TUI_REF=提交SHA bash <(curl -fsSL "https://raw.githubusercontent.com/xiaofeixoa/dandan-tui/main/launch.sh?v=$(date +%s)")
 ```
 
 GitHub 不可达或完全离线的 VPS 可用离线安装：把整个工程目录传到服务器后
@@ -247,7 +247,7 @@ sha256:          51a73716f23dcca716bc81083d5d50f817693550c6882107252daf5b35eb7c1
 ```
 
 WARP 本身有“同步脚本至最新版本”菜单项。上游原实现会再下载 GitLab 的 `menu.sh`；本项目仅对此处做了
-定向，将它改为从 `dandan8511/dandan-tui` 的 GitHub Raw 下载 `scripts/fscarmen-warp.sh`。也就是说，
+定向，将它改为从 `xiaofeixoa/dandan-tui` 的 GitHub Raw 下载 `scripts/fscarmen-warp.sh`。也就是说，
 从 TUI 启动 WARP 后在 WARP 菜单里升级，仍会保持使用你的本地化版本；可临时用 `YJL_WARP_UPDATE_URL`
 覆盖该地址测试分支。
 
@@ -357,7 +357,7 @@ sudo bash scripts/dockerhub-mirror.sh --configure-policy --max-cache-gb 1 --expi
 工具包的原始安装器快照来自 `xjetry/nft-forward` 的提交
 `5c099fdd6000dbfb088387c8494fbbbfb1de5025`，其 Release `v0.68.0` 的 `nft-agent`、
 `nft-server`、`SHA256SUMS` 已逐项校验并随本仓库保存。脚本的 `update-script` 和安装后生成的
-`nft-forward-upgrade` 会从 `dandan8511/dandan-tui/tools/nft-forward/install.sh` 更新自身，
+`nft-forward-upgrade` 会从 `xiaofeixoa/dandan-tui/tools/nft-forward/install.sh` 更新自身，
 而非上游的 `install.sh`。要升级到未打包的新 Release，可显式传入 `--release <tag>`；这时才会
 从上游或通过 `NFTF_RELEASE_BASE_URL` 指定的发布源下载对应二进制。
 

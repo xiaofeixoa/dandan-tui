@@ -9,7 +9,7 @@ case "$REF" in
         exit 1
         ;;
 esac
-BASE_URL="https://raw.githubusercontent.com/dandan8511/dandan-tui/${REF}"
+BASE_URL="https://raw.githubusercontent.com/xiaofeixoa/dandan-tui/${REF}"
 # 默认不附加缓存穿透参数：raw.githubusercontent.com 自带 CDN 缓存，
 # 需要强制拉最新时可设置 YJL_TUI_CACHE_BUSTER=任意值。
 CACHE_BUSTER="${YJL_TUI_CACHE_BUSTER:-}"

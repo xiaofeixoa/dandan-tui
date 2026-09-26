@@ -14,7 +14,7 @@ RELEASE_EXPLICIT=0
 REPO="xjetry/nft-forward"
 # The installer snapshot is owned by the TUI repository so upstream removal of
 # install.sh cannot break this TUI or a previously installed upgrade wrapper.
-SCRIPT_REPO="${NFTF_SCRIPT_REPO:-dandan8511/dandan-tui}"
+SCRIPT_REPO="${NFTF_SCRIPT_REPO:-xiaofeixoa/dandan-tui}"
 SCRIPT_REF="${NFTF_SCRIPT_REF:-main}"
 SCRIPT_FILE="${NFTF_SCRIPT_FILE:-tools/nft-forward/install.sh}"
 RELEASE="${NFTF_RELEASE:-latest}"

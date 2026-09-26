@@ -53,7 +53,7 @@ bash scripts/geosite/update.sh --sync
 
 ```text
 优先：SagerNet 官方 Raw
-失败：dandan8511/dandan-tui GitHub Raw 镜像，并核对 SHA256SUMS
+失败：xiaofeixoa/dandan-tui GitHub Raw 镜像，并核对 SHA256SUMS
 再失败：当前机器运行脚本旁的本地仓库镜像，并核对 SHA256SUMS
 全部失败：保留已有本地 .srs，明确报告失败，不覆盖为错误页面或空文件
 ```

@@ -2,6 +2,9 @@
 
 ## 1.1.0（2026-09-25）
 
+> 仓库迁移：本项目的主仓库现为 `xiaofeixoa/dandan-tui`，launch.sh、WARP 升级地址、
+> geosite 回退源、nft-forward 安装器内的自引用已全部指向新仓库。
+
 ### 结构重构（分门别类）
 
 - 单文件 `tui.py`（2680 行）拆分为 `yjl_tui/` 包：`paths.py`（路径与配置）、`probes.py`（系统探测）、

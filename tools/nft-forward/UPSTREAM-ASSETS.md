@@ -13,5 +13,5 @@ The binaries and checksum file in this directory were downloaded from the
 `nft-agent`, `nft-server`, and `SHA256SUMS` are byte-for-byte release assets.
 `install.sh` started from the listed release asset, then received a narrow local
 patch so it uses this directory as the default `file://` release source and
-updates its installer copy from `dandan8511/dandan-tui` rather than the upstream
+updates its installer copy from `xiaofeixoa/dandan-tui` rather than the upstream
 script URL.

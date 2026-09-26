@@ -11,7 +11,7 @@ UPSTREAM_META="$SCRIPT_DIR/UPSTREAM.json"
 
 UPSTREAM_ARCHIVE="${YJL_GEOSITE_ARCHIVE_URL:-https://codeload.github.com/SagerNet/sing-geosite/tar.gz/refs/heads/rule-set}"
 UPSTREAM_RAW="${YJL_GEOSITE_UPSTREAM_RAW:-https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set}"
-MIRROR_REPO="${YJL_TUI_REPO:-dandan8511/dandan-tui}"
+MIRROR_REPO="${YJL_TUI_REPO:-xiaofeixoa/dandan-tui}"
 MIRROR_REF="${YJL_TUI_REF:-main}"
 MIRROR_RAW="${YJL_GEOSITE_MIRROR_RAW:-https://raw.githubusercontent.com/${MIRROR_REPO}/${MIRROR_REF}/scripts/geosite/rule-set}"
 TARGET_DIR="${YJL_GEOSITE_RULE_DIR:-/etc/sing-box/rules}"

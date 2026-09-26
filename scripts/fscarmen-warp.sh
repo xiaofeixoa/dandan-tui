@@ -4,7 +4,7 @@
 VERSION='3.2.7'
 
 # 本地化入口和菜单内升级都从本仓库取得；可用环境变量临时覆盖以测试分支。
-YJL_WARP_UPDATE_URL="${YJL_WARP_UPDATE_URL:-https://raw.githubusercontent.com/dandan8511/dandan-tui/main/scripts/fscarmen-warp.sh}"
+YJL_WARP_UPDATE_URL="${YJL_WARP_UPDATE_URL:-https://raw.githubusercontent.com/xiaofeixoa/dandan-tui/main/scripts/fscarmen-warp.sh}"
 
 # 环境变量用于在Debian或Ubuntu操作系统中设置非交互式（noninteractive）安装模式
 export DEBIAN_FRONTEND=noninteractive

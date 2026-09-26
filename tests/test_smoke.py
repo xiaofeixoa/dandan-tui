@@ -436,7 +436,7 @@ run_online_install
         self.assertIn("VERSION='3.2.7'", source)
         self.assertIn("YJL_WARP_UPDATE_URL", source)
         self.assertIn(
-            "https://raw.githubusercontent.com/dandan8511/dandan-tui/main/scripts/fscarmen-warp.sh",
+            "https://raw.githubusercontent.com/xiaofeixoa/dandan-tui/main/scripts/fscarmen-warp.sh",
             source,
         )
 
@@ -473,7 +473,7 @@ run_online_install
         self.assertTrue(snapshot.is_file())
         source = snapshot.read_text(encoding="utf-8")
         self.assertIn('REPO="xjetry/nft-forward"', source)
-        self.assertIn('SCRIPT_REPO="${NFTF_SCRIPT_REPO:-dandan8511/dandan-tui}"', source)
+        self.assertIn('SCRIPT_REPO="${NFTF_SCRIPT_REPO:-xiaofeixoa/dandan-tui}"', source)
         self.assertIn('SCRIPT_FILE="${NFTF_SCRIPT_FILE:-tools/nft-forward/install.sh}"', source)
         self.assertIn('https://raw.githubusercontent.com/$SCRIPT_REPO/$SCRIPT_REF/$SCRIPT_FILE', source)
         self.assertIn('NFTF_RELEASE_BASE_URL="file://$LOCAL_TOOLS_DIR"', source)
