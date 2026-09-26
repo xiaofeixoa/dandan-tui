@@ -67,9 +67,15 @@ jobs:
       - name: unittest tests.test_doctor
         shell: bash
         run: python -m unittest tests.test_doctor -v
-      - name: unittest tests.test_yjl_tui
+      - name: unittest tests.test_yjl_tui.DispatchTests
         shell: bash
-        run: python -m unittest tests.test_yjl_tui -v
+        run: python -m unittest tests.test_yjl_tui.DispatchTests -v
+      - name: unittest tests.test_yjl_tui.HelperTests
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.HelperTests -v
+      - name: unittest tests.test_yjl_tui.EntryTests
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui.EntryTests -v
       - name: unittest tests.test_nginx_manager
         shell: bash
         run: python -m unittest tests.test_nginx_manager -v
