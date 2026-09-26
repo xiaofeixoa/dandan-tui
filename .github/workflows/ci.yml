@@ -54,12 +54,37 @@ jobs:
 
   windows:
     # 开发平台回归：curses/geteuid 守卫、CRLF 行尾、e2e 在 Git Bash 下同样必须成立。
+    # 按测试模块分步执行：runner 日志接口需要认证，步骤结论（公开）即可定位失败模块。
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Run test suite in Git Bash
+      - name: Prepare Git Bash tool PATH
         shell: bash
-        run: python -m unittest discover -s tests -v
+        run: echo "/usr/bin" >> "$GITHUB_PATH"
+      - name: unittest tests.test_doctor
+        shell: bash
+        run: python -m unittest tests.test_doctor -v
+      - name: unittest tests.test_yjl_tui
+        shell: bash
+        run: python -m unittest tests.test_yjl_tui -v
+      - name: unittest tests.test_nginx_manager
+        shell: bash
+        run: python -m unittest tests.test_nginx_manager -v
+      - name: unittest tests.test_kernel_manager
+        shell: bash
+        run: python -m unittest tests.test_kernel_manager -v
+      - name: unittest tests.test_singbox_manager
+        shell: bash
+        run: python -m unittest tests.test_singbox_manager -v
+      - name: unittest tests.test_smoke.ConfigSmokeTests
+        shell: bash
+        run: python -m unittest tests.test_smoke.ConfigSmokeTests -v
+      - name: unittest tests.test_smoke.LocalBehaviorTests
+        shell: bash
+        run: python -m unittest tests.test_smoke.LocalBehaviorTests -v
+      - name: unittest tests.test_launch_e2e
+        shell: bash
+        run: python -m unittest tests.test_launch_e2e -v

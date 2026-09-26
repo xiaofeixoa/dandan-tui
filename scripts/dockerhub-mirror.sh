@@ -393,7 +393,7 @@ server_install() {
   else
     printf 'Docker Hub 缓存验证未通过；容器仍已启动，请检查 Registry 日志和 Docker Hub 连通性。\n' >&2
   fi
-  printf '\n国内客户端配置示例：\n  sudo bash dockerhub-mirror.sh --client --mirror %s%s\n' "$public_url" "$([[ "$public_url" == http://* ]] && printf ' --insecure' || true)"
+  printf '\n国内客户端配置示例：\n  sudo bash dockerhub-mirror.sh --client --mirror %s%s\n' "$public_url" "$(if [[ "$public_url" == http://* ]]; then printf ' --insecure'; fi)"
 }
 
 client_config() {

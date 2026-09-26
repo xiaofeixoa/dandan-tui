@@ -632,7 +632,7 @@ update_cloudflared() {
   service_stop_disable
   rm -f "$CLOUDFLARED"
   install_cloudflared
-  service_exists && service_enable_start || true
+  if service_exists; then service_enable_start; fi
 }
 
 menu() {
