@@ -94,6 +94,7 @@ scripts.json            菜单与动作定义（分类 + 动作）
 tcp_profiles.json       本地 TCP 调优方案参数
 scripts/                各功能使用的本地脚本与上游快照
 tools/nft-forward/      nft-forward 固定版本的本地工具包
+tools/nginx-ui/         nginx-ui v2.5.7 固定快照（安装器 + 三架构归档 + 服务文件）
 yjl-argo/               yjl-argo（Cloudflare Tunnel 管理器）
 tests/                  unittest 套件（smoke / kernel / singbox）
 docs/                   设计与实施记录
@@ -268,10 +269,12 @@ reload；失败会把新文件移入 `/var/backups/yjl-tui/nginx/`，不覆盖�
 `python3-certbot-dns-cloudflare`，Token 会写入 `/etc/letsencrypt/yjl-tui/` 下的 `0600` 凭据文件，供
 后续定时续期使用。Token 不写入 TUI 日志。
 
-同一分类中的“nginx 网页管理工具 (nginx-ui)”是可选网页面板。`launch.sh` 不会下载 nginx-ui；只有选择
-该菜单项时，TUI 才会从 `dandan8511/nginx-ui` 下载安装器。你的镜像 Release
-`v2.5.7` 已包含 Linux x64、x32 和 arm64 三个二进制附件；安装器会按当前架构从你的 Release 下载对应
-文件，并新建 nginx-ui 服务和网页监听端口，不能把它当作已有 Nginx 的无影响更新。
+同一分类中的“nginx 网页管理工具 (nginx-ui)”是可选网页面板。`tools/nginx-ui/` 内含
+`v2.5.7` 固定版本的三架构归档（x64/x32/arm64）、服务文件与改造后的安装器，运行时不再访问
+`dandan8511/nginx-ui`：`launch.sh` 只缓存安装器与 `SHA256SUMS`，进入菜单后按架构从本仓库
+raw 下载归档并校验；完全离线时可用 `NGINX_UI_LOCAL_SOURCE=<归档目录> bash install.sh`。
+安装会新建 nginx-ui 服务和网页监听端口，不能把它当作已有 Nginx 的无影响更新。来源与升级
+方法见 [`tools/nginx-ui/UPSTREAM-ASSETS.md`](tools/nginx-ui/UPSTREAM-ASSETS.md)。
 
 ## Docker 管理
 
@@ -367,6 +370,18 @@ sudo bash scripts/dockerhub-mirror.sh --configure-policy --max-cache-gb 1 --expi
 会把脚本缓存到本地。独立安装与测试说明见 [`yjl-argo/README.md`](yjl-argo/README.md)。
 
 Nodeseek 分类中的 TCP 窗口调优（`scripts/nekoneko-tools.sh`）等脚本同样由 `launch.sh` 一并缓存，`scripts/check-launch-manifest.sh` 保证清单里的每个本地脚本都会被下载。
+
+### nodeseek合集（社区脚本）
+
+「nodeseek合集」分类收录 NodeSeek 社区常用脚本合集帖的在线入口（DD 重装、综合/性能测试、流媒体与
+IP 质量、测速、回程路由、SWAP/Fail2ban、Python/realm/gost/哪吒/Argo/PVE、科技lion、杜甫检测等
+37 项），均为 `kind: online` 动作：执行时下载、bash 语法检查后进入脚本自身交互。说明：
+
+- 锐速/BBRPLUS（tcpx）、TCP 窗口调优（nekoneko）、WARP、Docker 等与既有分类重复或本 TUI 已有
+  更安全本地实现的，不在重复收录；
+- 来源已失效的条目（`bench.im`、`git.io`、ghproxy 链接、DNS-Alice-Unlock）已剔除；
+- `check.unlock.media`、`sick.onl`、`bash.icu` 等域名部分国内网络可能无法直连，海外 VPS 正常；
+- 第三方脚本行为由各自上游决定，涉及重装/调优的条目请先读菜单描述再执行。
 
 ## 维护与开发
 

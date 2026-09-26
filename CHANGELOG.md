@@ -40,6 +40,12 @@
 
 ### 工程化
 
+- 自包含化：`nginx-ui` 网页面板改为仓库内固定快照（`tools/nginx-ui/`，v2.5.7 三架构归档 +
+  服务文件 + 改造后安装器，SHA256SUMS 校验、支持 `NGINX_UI_LOCAL_SOURCE` 离线安装），
+  运行时不再调用 `dandan8511` 的任何工程；新增守门测试断言运行时文件无旧仓库 URL。
+- 新增「nodeseek合集」分类：收录 NodeSeek 社区合集帖的 37 个在线脚本入口
+  （DD 重装、综合/性能测试、流媒体与 IP 质量、测速、回程、功能与环境脚本、杜甫检测），
+  已剔除失效来源（bench.im/git.io/ghproxy/DNS-Alice-Unlock）。
 - `launch.sh` 新增离线安装模式：`YJL_TUI_LOCAL_SOURCE=/path/to/dandan-tui bash launch.sh`
   直接从本地工程目录复制全部文件（不访问网络），SHA256SUMS 校验照常执行——用于 GitHub
   不可达或完全离线的 VPS。

@@ -224,10 +224,47 @@ class ConfigSmokeTests(unittest.TestCase):
         actions = {action["id"]: action for action in self.config["actions"]}
         action = actions["nginx_ui"]
         self.assertEqual(action["category"], "server")
-        self.assertEqual(action["kind"], "online")
-        self.assertEqual(action["url"], "https://raw.githubusercontent.com/dandan8511/nginx-ui/dev/install.sh")
+        self.assertEqual(action["kind"], "local_script")
+        self.assertEqual(action["path"], "tools/nginx-ui/install.sh")
+        self.assertTrue((ROOT / action["path"]).is_file())
         launcher = (ROOT / "launch.sh").read_text(encoding="utf-8")
-        self.assertNotIn("nginx-ui", launcher)
+        # 安装器与校验清单随 launch.sh 缓存；大体积面板归档保持惰性，不进 FILES。
+        self.assertIn("tools/nginx-ui/install.sh", launcher)
+        self.assertIn("tools/nginx-ui/SHA256SUMS", launcher)
+        self.assertNotIn("tools/nginx-ui/nginx-ui-linux", launcher)
+        installer = (ROOT / "tools/nginx-ui/install.sh").read_text(encoding="utf-8")
+        self.assertIn("RELEASE_PINNED='v2.5.7'", installer)
+        self.assertIn("raw.githubusercontent.com/xiaofeixoa/dandan-tui/main/tools/nginx-ui", installer)
+        self.assertIn("NGINX_UI_LOCAL_SOURCE", installer)
+        self.assertNotIn("github.com/dandan8511", installer)
+
+    def test_nodeseek_collection_category(self):
+        categories = {category["id"]: category["title"] for category in self.config["categories"]}
+        self.assertEqual(categories.get("nodeseek_collection"), "nodeseek合集")
+        actions = [action for action in self.config["actions"] if action.get("category") == "nodeseek_collection"]
+        self.assertGreaterEqual(len(actions), 35)
+        ids = [action["id"] for action in actions]
+        self.assertEqual(len(ids), len(set(ids)))
+        for action in actions:
+            self.assertEqual(action["kind"], "online", action["id"])
+            self.assertTrue(action["url"].startswith("https://"), action["id"])
+            self.assertIn("来源：NodeSeek 合集帖", action["description"], action["id"])
+        # 与既有动作功能重复或来源已失效的条目不应收录。
+        urls = " ".join(action["url"] for action in actions)
+        for dead in ("bench.im", "git.io", "ghproxy", "DNS-Alice-Unlock"):
+            self.assertNotIn(dead, urls)
+
+    def test_no_runtime_urls_point_to_dandan8511(self):
+        # 仓库迁移守门：运行时会访问的文件一律不得再指向 dandan8511。
+        # （nginx-ui 镜像仓库 dandan8511/nginx-ui 属另一项目，如需迁移见 README。）
+        runtime_files = (
+            "launch.sh", "scripts.json", "scripts/fscarmen-warp.sh",
+            "scripts/geosite/update.sh", "tools/nft-forward/install.sh",
+            "tools/nginx-ui/install.sh", "run.sh", "tui.py",
+        )
+        for name in runtime_files:
+            text = (ROOT / name).read_text(encoding="utf-8")
+            self.assertNotIn("github.com/dandan8511", text, name)
 
     def test_nginx_stages_an_included_conf_before_replacing(self):
         source = (ROOT / "nginx_manager.py").read_text(encoding="utf-8")

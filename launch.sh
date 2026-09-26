@@ -57,6 +57,8 @@ FILES=(
     "scripts/ubuntu-mainline-signing-key.gpg|600"
     "scripts/ubuntu-mainline-signing-key.md|600"
     "tools/nft-forward/install.sh|700"
+    "tools/nginx-ui/install.sh|700"
+    "tools/nginx-ui/SHA256SUMS|600"
     "yjl-argo/yjl-argo.sh|700"
 )
 

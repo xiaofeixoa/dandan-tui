@@ -1,0 +1,7 @@
+c2121942e976e5dcdb35b2fbd47cdedc592fcc29bd9f16c822ba44e5079ec39e  nginx-ui-linux-32.tar.gz
+21246abd39c66850e59ca414ef523b78cfbf5e53c0c9ee32691c3238df54d6c4  nginx-ui-linux-64.tar.gz
+e0638b6dbcc63df2202712136bca06e7a11c69158363c991957dcae5b7da62dc  nginx-ui-linux-arm64-v8a.tar.gz
+1037412d4fbdc97f768cb671b5d7cd3c220fd1cdc425c29884bb825c61ebf539  resources/services/nginx-ui.service
+33bc1b55a01340c89cf7c71eb0fddfb0fc851eb81489f18360cc469c43cc5fd0  resources/services/nginx-ui.rc
+f488fac61e81bc9401b53a09ff78a248a3a6f09a8daa43c66f99f77dcae7d1a7  resources/services/nginx-ui.openwrt
+397c13c52a82c5273c7d0366772bd6f172d196a305022f7f905a3830e255d853  resources/services/nginx-ui.init
