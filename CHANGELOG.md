@@ -44,7 +44,11 @@
   服务文件 + 改造后安装器，SHA256SUMS 校验、支持 `NGINX_UI_LOCAL_SOURCE` 离线安装），
   运行时不再调用 `dandan8511` 的任何工程；新增守门测试断言运行时文件无旧仓库 URL。
 - online 动作支持 `prompt_args` 执行前参数输入（shlex 解析、支持引号；留空/解析失败
-  回退为无参数运行），DD 重装类脚本因此可从菜单直接传参。
+  回退为无参数运行）。
+- DD 重装改为交互式向导：分步选择目标系统/版本（leitbogioro 支持 Debian/Ubuntu/
+  Windows/CentOS/RockyLinux/AlmaLinux，moeclub 支持 Debian/Ubuntu/CentOS）、新密码
+  getpass 输入、SSH 端口与 -firmware 选项；汇总预览（密码打码）后需输入 `DD` 才开始，
+  执行阶段展示不带密码。fcurrk 的 NewReinstall 自带菜单直接运行。
 - 新增「nodeseek合集」分类：收录 NodeSeek 社区合集帖的 37 个在线脚本入口
   （DD 重装、综合/性能测试、流媒体与 IP 质量、测速、回程、功能与环境脚本、杜甫检测），
   已剔除失效来源（bench.im/git.io/ghproxy/DNS-Alice-Unlock）。

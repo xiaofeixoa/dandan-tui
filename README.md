@@ -382,8 +382,10 @@ IP 质量、测速、回程路由、SWAP/Fail2ban、Python/realm/gost/哪吒/Arg
 - 来源已失效的条目（`bench.im`、`git.io`、ghproxy 链接、DNS-Alice-Unlock）已剔除；
 - `check.unlock.media`、`sick.onl`、`bash.icu` 等域名部分国内网络可能无法直连，海外 VPS 正常；
 - 第三方脚本行为由各自上游决定，涉及重装/调优的条目请先读菜单描述再执行；
-- 需要参数的脚本（如三个 DD 重装）会在执行前提示输入参数，支持引号包裹密码，
-  留空回车只显示脚本用法。
+- 三个 DD 重装是交互式向导：分步选择目标系统/版本（leitbogioro 支持 Debian/Ubuntu/
+  Windows/CentOS/RockyLinux/AlmaLinux，moeclub 支持 Debian/Ubuntu/CentOS）、输入新密码
+  （getpass 不回显）和 SSH 端口，汇总展示（密码打码）后输入 `DD` 才开始重装；
+  fcurrk 直接进入其自带交互菜单。
 
 ## 维护与开发
 

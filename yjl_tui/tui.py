@@ -1405,8 +1405,9 @@ class TUI:
         env: dict[str, str] | None = None,
         cwd: Path | None = None,
         pause_after: bool = True,
+        display_cmd: str | None = None,
     ) -> int:
-        print(f"\n命令：{shlex.join(cmd)}\n日志：{log}")
+        print(f"\n命令：{display_cmd or shlex.join(cmd)}\n日志：{log}")
         print("以下进入原脚本的真实终端交互，结束后按 Enter 返回。\n")
         merged = os.environ.copy()
         if env:
@@ -1513,12 +1514,132 @@ class TUI:
             return 2
         if action.get("mode") == "fnm":
             return self.run_fnm(path, log)
+        if action.get("mode") == "dd":
+            return self.dd_reinstall(action, log, path)
         args = list(map(str, action.get("args", [])))
         prompt = action.get("prompt_args")
         if prompt:
             args.extend(self.prompt_script_args(prompt))
         env = action.get("env") if isinstance(action.get("env"), dict) else None
         return self.interactive([interpreter, str(path), *args], log, env)
+
+    # ---------- DD 重装向导 ----------
+
+    DD_LEITBOGIORO_SYSTEMS = {
+        "1": ("debian", "Debian", "12"),
+        "2": ("ubuntu", "Ubuntu", "22.04"),
+        "3": ("windows", "Windows", "10"),
+        "4": ("centos", "CentOS", "9"),
+        "5": ("rockylinux", "RockyLinux", "9"),
+        "6": ("almalinux", "AlmaLinux", "9"),
+    }
+
+    DD_MOECLUB_SYSTEMS = {
+        "1": ("d", "Debian", "11"),
+        "2": ("u", "Ubuntu", "20.04"),
+        "3": ("c", "CentOS", "7"),
+    }
+
+    @classmethod
+    def build_dd_args(
+        cls,
+        variant: str,
+        system_flag: str,
+        version: str,
+        password: str,
+        port: str,
+        firmware: bool = False,
+        lang: str = "cn",
+    ) -> list[str]:
+        """按脚本变体拼装 DD 参数；不合法输入抛 ValueError。"""
+        if not version:
+            raise ValueError("未提供目标系统版本。")
+        if not system_flag:
+            raise ValueError("未提供目标系统。")
+        if not password and not (variant == "leitbogioro" and system_flag == "windows"):
+            # 仅 leitbogioro 的 Windows 允许留空密码（镜像默认 Administrator / Teddysun.com）。
+            raise ValueError("未提供新密码。")
+        if port and (not port.isdigit() or not 1 <= int(port) <= 65535):
+            raise ValueError("SSH 端口必须是 1-65535 的整数。")
+        if variant == "leitbogioro":
+            args = [f"-{system_flag}", version]
+            if system_flag == "windows":
+                args += ["-lang", lang]
+            if password:
+                args += ["-pwd", password]
+            if port:
+                args += ["-port", port]
+            if firmware:
+                args.append("-firmware")
+            return args
+        if variant == "moeclub":
+            if system_flag == "windows":
+                raise ValueError("MoeClub 入口不提供 Windows；Windows 请使用 leitbogioro 入口。")
+            args = [f"-{system_flag}", version, "-v", "64", "-p", password, "-a"]
+            if port:
+                args += ["-port", port]
+            if firmware:
+                args.append("-firmware")
+            return args
+        raise ValueError(f"未知 DD 脚本变体：{variant}")
+
+    def dd_reinstall(self, action: dict, log: Path, script: Path) -> int:
+        variant = action.get("dd_variant", "leitbogioro")
+        systems = self.DD_LEITBOGIORO_SYSTEMS if variant == "leitbogioro" else self.DD_MOECLUB_SYSTEMS
+        print("== DD 重装系统 ==")
+        print("警告：DD 会清空硬盘并重装整个操作系统，盘上数据全部丢失；")
+        print("重装完成后需用新密码（和端口）重新 SSH 登录，过程通常 10-30 分钟。")
+        if input("确认继续？输入 yes：").strip().lower() != "yes":
+            print("已取消。")
+            return 2
+        print("目标系统：")
+        for key, (_, label, _) in systems.items():
+            print(f"  {key}. {label}")
+        print(f"  7. 自定义（手动输入该脚本的完整参数）")
+        choice = input("选择 [1]: ").strip() or "1"
+        if choice == "7":
+            raw = input("输入完整参数：").strip()
+            try:
+                args = shlex.split(raw)
+            except ValueError as exc:
+                print(f"参数解析失败（{exc}），已取消。")
+                return 2
+            if not args:
+                print("未输入参数，已取消。")
+                return 2
+        else:
+            if choice not in systems:
+                print("无效选择，已取消。")
+                return 2
+            system_flag, label, default_version = systems[choice]
+            version = input(f"{label} 版本 [{default_version}]：").strip() or default_version
+            password = getpass.getpass("新密码（重装后的登录密码，不回显）：")
+            if variant == "leitbogioro" and system_flag == "windows" and not password:
+                print("未设密码，Windows 将使用镜像默认：Administrator / Teddysun.com。")
+            elif not password:
+                print("密码不能为空，已取消。")
+                return 2
+            port = input("SSH 端口（留空保持脚本默认）：").strip()
+            firmware = input("旧机器需要 -firmware 固件支持？[y/N] ").strip().lower() in {"y", "yes"}
+            lang = "cn"
+            if variant == "leitbogioro" and system_flag == "windows":
+                lang = input("Windows 语言 [cn]：").strip() or "cn"
+            try:
+                args = self.build_dd_args(variant, system_flag, version, password, port, firmware, lang)
+            except ValueError as exc:
+                print(f"参数不合法：{exc}")
+                return 2
+        print("\n将执行：")
+        display = shlex.join(["bash", str(script), *args])
+        if "-pwd" in args:
+            display = re.sub(r"(-pwd\s+)\S+", r"\1******", display)
+        print("  " + display)
+        if input("最终确认：输入 DD 开始重装（其他任意输入取消）：").strip() != "DD":
+            print("已取消。")
+            return 2
+        print("开始 DD。期间 SSH 会断开；完成后请用新密码重新登录并用 uname -a 核对系统。")
+        return self.interactive(["bash", str(script), *args], log, pause_after=False,
+                                display_cmd="bash " + shlex.quote(str(script)) + " <DD 参数已隐藏>")
 
     def local_script(self, action: dict, log: Path) -> int:
         relative = action.get("path")

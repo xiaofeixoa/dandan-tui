@@ -253,11 +253,14 @@ class ConfigSmokeTests(unittest.TestCase):
         urls = " ".join(action["url"] for action in actions)
         for dead in ("bench.im", "git.io", "ghproxy", "DNS-Alice-Unlock"):
             self.assertNotIn(dead, urls)
-        # DD 重装类脚本必须带参数输入提示（无参数运行只显示用法，无法完成重装）。
+        # DD 重装类脚本必须是交互向导（leitbogioro/moeclub 走 TUI 向导，fcurrk 自带菜单）。
         dd = {action["id"]: action for action in actions if action["id"].startswith("ns_dd_")}
         self.assertEqual(set(dd), {"ns_dd_leitbogioro", "ns_dd_moeclub", "ns_dd_fcurrk"})
-        for action in dd.values():
-            self.assertIn("prompt_args", action, action["id"])
+        self.assertEqual(dd["ns_dd_leitbogioro"]["mode"], "dd")
+        self.assertEqual(dd["ns_dd_leitbogioro"]["dd_variant"], "leitbogioro")
+        self.assertEqual(dd["ns_dd_moeclub"]["mode"], "dd")
+        self.assertEqual(dd["ns_dd_moeclub"]["dd_variant"], "moeclub")
+        self.assertNotIn("prompt_args", dd["ns_dd_fcurrk"])
 
     def test_no_runtime_urls_point_to_dandan8511(self):
         # 仓库迁移守门：运行时会访问的文件一律不得再指向 dandan8511。

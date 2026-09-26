@@ -128,6 +128,47 @@ class HelperTests(unittest.TestCase):
         with mock.patch("builtins.input", return_value="-debian '12"), mock.patch("sys.stdout", new_callable=StringIO):
             self.assertEqual(tui.TUI.prompt_script_args("参数"), [])
 
+    def test_build_dd_args_leitbogioro_linux_and_windows(self):
+        args = tui.TUI.build_dd_args("leitbogioro", "debian", "12", "Pwd@123", "")
+        self.assertEqual(args, ["-debian", "12", "-pwd", "Pwd@123"])
+        args = tui.TUI.build_dd_args("leitbogioro", "debian", "12", "Pwd@123", "2222", firmware=True)
+        self.assertEqual(args, ["-debian", "12", "-pwd", "Pwd@123", "-port", "2222", "-firmware"])
+        args = tui.TUI.build_dd_args("leitbogioro", "windows", "10", "", "", lang="cn")
+        self.assertEqual(args, ["-windows", "10", "-lang", "cn"])
+
+    def test_build_dd_args_moeclub_and_validation(self):
+        args = tui.TUI.build_dd_args("moeclub", "d", "11", "Pwd@123", "2222", firmware=True)
+        self.assertEqual(args, ["-d", "11", "-v", "64", "-p", "Pwd@123", "-a", "-port", "2222", "-firmware"])
+        with self.assertRaises(ValueError):
+            tui.TUI.build_dd_args("moeclub", "windows", "10", "x", "")
+        for bad in (("", "12", "pw", ""), ("debian", "", "pw", ""), ("debian", "12", "", ""), ("debian", "12", "pw", "99999")):
+            with self.assertRaises(ValueError):
+                tui.TUI.build_dd_args("leitbogioro", bad[0], bad[1], bad[2], bad[3])
+
+    def test_dd_reinstall_wizard_full_flow(self):
+        manager = tui.TUI({"categories": [], "actions": []})
+        script = Path("/tmp/InstallNET.sh")
+        answers = iter(["yes", "1", "", "", "", "DD"])  # 确认 / Debian / 版本默认 / 端口默认 / firmware 默认 / 最终确认
+        with mock.patch("builtins.input", side_effect=lambda *_: next(answers)), \
+             mock.patch("yjl_tui.tui.getpass.getpass", return_value="Pwd@123"), \
+             mock.patch.object(manager, "interactive", return_value=0) as interactive, \
+             mock.patch("sys.stdout", new_callable=StringIO) as out:
+            rc = manager.dd_reinstall({"dd_variant": "leitbogioro"}, Path("/tmp/dd.log"), script)
+        self.assertEqual(rc, 0)
+        argv = interactive.call_args.args[0]
+        self.assertEqual(argv, ["bash", str(script), "-debian", "12", "-pwd", "Pwd@123"])
+        self.assertFalse(interactive.call_args.kwargs.get("pause_after", True))
+        # 执行阶段的命令展示不带密码；执行前的汇总预览里密码已打码。
+        self.assertNotIn("Pwd@123", interactive.call_args.kwargs["display_cmd"])
+        self.assertIn("******", out.getvalue())
+        self.assertNotIn("-pwd Pwd@123", out.getvalue())
+
+    def test_dd_reinstall_cancelled_before_anything(self):
+        manager = tui.TUI({"categories": [], "actions": []})
+        with mock.patch("builtins.input", return_value="no"), \
+             mock.patch("sys.stdout", new_callable=StringIO):
+            self.assertEqual(manager.dd_reinstall({"dd_variant": "leitbogioro"}, Path("/tmp/dd.log"), Path("/tmp/i.sh")), 2)
+
     def test_online_prompt_args_are_appended_after_static_args(self):
         manager = tui.TUI({"categories": [], "actions": []})
         action = {
