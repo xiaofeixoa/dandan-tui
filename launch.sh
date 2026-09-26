@@ -164,8 +164,19 @@ install_python3() {
     command -v python3 >/dev/null 2>&1
 }
 
-if ! command -v python3 >/dev/null 2>&1; then
-    if ! install_python3 || ! command -v python3 >/dev/null 2>&1; then
+# 与 run.sh 相同的判定：依次尝试 python3 / python，并验证真的能执行
+# （Windows 等平台上 python3 可能是商店占位程序；两者皆无时才尝试自动安装）。
+find_python() {
+    for candidate in python3 python; do
+        if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c "" >/dev/null 2>&1; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+if ! find_python; then
+    if ! install_python3 || ! find_python; then
         printf '%s\n' '错误：python3 自动安装失败，请手动安装后重试。' >&2
         exit 127
     fi

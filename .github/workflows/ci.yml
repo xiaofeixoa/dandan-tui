@@ -31,9 +31,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: ShellCheck (self-maintained scripts; vendored snapshots excluded)
+      - name: Ensure shellcheck is installed
         run: |
-          shellcheck -s bash             launch.sh run.sh             scripts/check-launch-manifest.sh scripts/regen-launch-manifest.sh             scripts/geosite/release-pack.sh             scripts/docker-mirror-switch.sh scripts/dockerhub-mirror.sh             scripts/tcp-brutal-manager.sh             yjl-argo/yjl-argo.sh yjl-argo/install.sh             tools/nft-forward/install.sh
+          if ! command -v shellcheck >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y shellcheck
+          fi
+          shellcheck --version | head -2
+      - name: ShellCheck (self-maintained scripts; vendored snapshots excluded)
+        run: >-
+          shellcheck -s bash
+          launch.sh run.sh
+          scripts/check-launch-manifest.sh
+          scripts/regen-launch-manifest.sh
+          scripts/geosite/release-pack.sh
+          scripts/docker-mirror-switch.sh
+          scripts/dockerhub-mirror.sh
+          scripts/tcp-brutal-manager.sh
+          yjl-argo/yjl-argo.sh
+          yjl-argo/install.sh
+          tools/nft-forward/install.sh
 
   windows:
     # 开发平台回归：curses/geteuid 守卫、CRLF 行尾、e2e 在 Git Bash 下同样必须成立。
