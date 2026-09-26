@@ -1,5 +1,42 @@
 # 更新日志
 
+## 1.2.0（2026-09-27）
+
+### 仓库与自包含
+
+- 主仓库迁移至 `xiaofeixoa/dandan-tui`：launch.sh、WARP 升级地址、geosite 回退源、
+  nft-forward 安装器的自引用全部指向新仓库，并新增运行时无旧仓库 URL 的守门测试。
+- `nginx-ui` 网页面板改为仓库内固定快照（`tools/nginx-ui/`，v2.5.7 三架构归档 +
+  服务文件 + 改造安装器，SHA256SUMS 校验、`NGINX_UI_LOCAL_SOURCE` 离线安装）。
+
+### 菜单与脚本
+
+- 新增「nodeseek合集」分类：收录 NodeSeek 社区合集帖的 37 个在线脚本入口（DD 重装、
+  综合与性能测试、流媒体与 IP 质量、测速、回程、功能与环境脚本、杜甫检测），
+  已剔除失效来源（bench.im/git.io/ghproxy/DNS-Alice-Unlock）。
+- online 动作支持 `prompt_args` 执行前参数输入；DD 重装改为交互式向导
+  （分步选择系统/版本、密码 getpass、汇总打码、输入 DD 才开始）。
+- 全量审计 62 个 online 动作的交互形态并以
+  `test_online_actions_declare_interaction_model` 固化，未声明的新动作会被 CI 拒绝。
+
+### 菜单可用性
+
+- TUI 内按 `/` 跨全部分类搜索动作（匹配 id/标题/描述），结果挂到虚拟分类下选择执行。
+- 新增「最近使用」虚拟分类：自动记录动作使用次数与时间（`STATE/usage.json`，
+  原子写入），按最近时间倒序置顶展示，文件损坏自动重置。
+
+### CI
+
+- shellcheck 任务（自维护脚本零告警，vendored 快照豁免）。
+- windows-latest 平台回归任务：全量单测在 Git Bash 下运行（PYTHONUTF8 处理编码、
+  /usr/bin 工具路径、按模块重试 + continue-on-error 抗 runner 抖动）。
+
+### 修复
+
+- launch.sh 的 python3 探测与 run.sh 对齐（先验证可执行再用）。
+- dockerhub-mirror/tcp-brutal-manager/yjl-argo/nft-forward 全部 shellcheck 告警清零
+  （SC1090/SC1091/SC2015/SC2086/SC2034）。
+
 ## 1.1.0（2026-09-25）
 
 > 仓库迁移：本项目的主仓库现为 `xiaofeixoa/dandan-tui`，launch.sh、WARP 升级地址、

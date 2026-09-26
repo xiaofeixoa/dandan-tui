@@ -67,6 +67,20 @@ CONFIRM_PROMPTS = {
 }
 
 
+def filter_actions(actions: list[dict], query: str) -> list[dict]:
+    """按关键字过滤动作（匹配 id / 标题 / 描述，大小写不敏感）；空关键字返回空列表。"""
+    q = query.strip().lower()
+    if not q:
+        return []
+    return [
+        action
+        for action in actions
+        if q in action.get("id", "").lower()
+        or q in action.get("title", "").lower()
+        or q in action.get("description", "").lower()
+    ]
+
+
 def pause() -> None:
     input("\n按 Enter 返回菜单...")
 
@@ -76,6 +90,10 @@ def ask(prompt: str, default: str = "1") -> str:
 
 
 class TUI:
+    RECENT_CATEGORY_ID = "__recent__"
+    SEARCH_CATEGORY_ID = "__search__"
+    RECENT_LIMIT = 12
+
     # 动作 id → 方法名；dispatch 时用 getattr 惰性解析，替换方法/打桩都能生效。
     HANDLER_NAMES = {
         "system_info": "system_info",
@@ -110,12 +128,91 @@ class TUI:
     }
 
     def __init__(self, config: dict):
-        self.categories = config["categories"]
+        self.real_categories = list(config["categories"])
         self.actions = config["actions"]
+        self.search_query = ""
+        self.search_matches: list[dict] = []
+        # 「最近使用」/「搜索」是挂在真实分类前的虚拟分类，rebuild_categories 统一组装。
+        self.categories = list(self.real_categories)
         self.category = 0
         self.selected = 0
         self.should_exit = False
-        self.status = "方向键选择，Enter 执行，Tab/左右切换分类，q 退出"
+        self.status = "方向键选择，Enter 执行，Tab/左右切换分类，/ 搜索，q 退出"
+        self.rebuild_categories()
+
+    # ---------- 虚拟分类：最近使用 / 搜索 ----------
+
+    def usage_path(self) -> Path:
+        return STATE / "usage.json"
+
+    def recent_ids(self, limit: int = RECENT_LIMIT) -> list[str]:
+        """按最近使用时间排序的动作 id；文件缺失或损坏时返回空。"""
+        try:
+            data = json.loads(self.usage_path().read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        if not isinstance(data, dict):
+            return []
+        items = sorted(data.items(), key=lambda kv: str(kv[1].get("last", "")), reverse=True)
+        known = {a["id"] for a in self.actions}
+        return [k for k, _ in items if k in known][:limit]
+
+    def record_usage(self, action_id: str) -> None:
+        """记录动作使用次数与最近时间；任何失败都不影响动作执行。"""
+        try:
+            STATE.mkdir(parents=True, exist_ok=True)
+            usage_file = self.usage_path()
+            try:
+                data = json.loads(usage_file.read_text(encoding="utf-8"))
+                if not isinstance(data, dict):
+                    data = {}
+            except (OSError, ValueError):
+                data = {}
+            entry = data.get(action_id)
+            count = entry["count"] + 1 if isinstance(entry, dict) and isinstance(entry.get("count"), int) else 1
+            data[action_id] = {"count": count, "last": time.strftime("%Y-%m-%dT%H:%M:%S")}
+            tmp = usage_file.with_name(f".{usage_file.name}.{os.getpid()}.tmp")
+            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            os.replace(tmp, usage_file)
+        except OSError:
+            pass
+
+    def rebuild_categories(self) -> None:
+        """组装 虚拟分类（最近使用/搜索）+ 真实分类，并尽量保持当前分类选中。"""
+        current_cid = self.categories[self.category]["id"] if self.categories else None
+        extras = []
+        if self.actions and self.recent_ids():
+            extras.append({"id": self.RECENT_CATEGORY_ID, "title": "最近使用"})
+        if self.search_query:
+            extras.append({"id": self.SEARCH_CATEGORY_ID, "title": f"搜索：{self.search_query}"})
+        self.categories = extras + self.real_categories
+        ids = [c["id"] for c in self.categories]
+        if current_cid in ids:
+            self.category = ids.index(current_cid)
+        else:
+            self.category = 0
+            self.selected = 0
+
+    def set_search(self, query: str) -> None:
+        self.search_query = query.strip()
+        self.search_matches = filter_actions(self.actions, self.search_query)
+        self.rebuild_categories()
+        ids = [c["id"] for c in self.categories]
+        if self.search_query and self.SEARCH_CATEGORY_ID in ids:
+            self.category = ids.index(self.SEARCH_CATEGORY_ID)
+            self.selected = 0
+            self.status = f"搜索「{self.search_query}」：{len(self.search_matches)} 个匹配"
+        elif not self.search_query:
+            self.status = "已清除搜索"
+
+    def current_actions(self) -> list[dict]:
+        cid = self.categories[self.category]["id"]
+        if cid == self.RECENT_CATEGORY_ID:
+            by_id = {a["id"]: a for a in self.actions}
+            return [by_id[i] for i in self.recent_ids() if i in by_id]
+        if cid == self.SEARCH_CATEGORY_ID:
+            return self.search_matches
+        return [a for a in self.actions if a.get("category") == cid]
 
     def _nginx_manager_action(self, log: Path) -> int:
         del log  # nginx 管理器自带交互界面，不使用 TUI 日志
@@ -129,10 +226,6 @@ class TUI:
 
     def _docker_restart_action(self, log: Path) -> int:
         return self.docker_container_action("docker_restart", log)
-
-    def current_actions(self) -> list[dict]:
-        cid = self.categories[self.category]["id"]
-        return [a for a in self.actions if a.get("category") == cid]
 
     def log_file(self, action_id: str) -> Path:
         LOGS.mkdir(parents=True, exist_ok=True)
@@ -2066,6 +2159,7 @@ done'''
 
     def execute(self, action: dict) -> None:
         log = self.log_file(action["id"])
+        self.record_usage(action["id"])
         if not self.confirm(action):
             self.status = "已取消"
             return
@@ -2077,6 +2171,7 @@ done'''
         print("\n" + "=" * 70 + f"\n开始：{action['title']}\n" + "=" * 70)
         rc = self.dispatch(action, log)
         self.status = f"{action['title']} 结束，退出码 {rc}；日志：{log}"
+        self.rebuild_categories()
 
     # ---------- curses 界面 ----------
 
@@ -2104,7 +2199,7 @@ done'''
         screen.hline(y - 1, 0, curses.ACS_HLINE, width)
         screen.addnstr(y, 2, "说明：" + current.get("description", ""), width - 4, curses.color_pair(3))
         screen.addnstr(y + 1, 2, self.status, width - 4)
-        screen.addnstr(height - 2, 2, "↑↓/jk 选择  ←→/Tab 分类  Enter 执行  q 退出", width - 4, curses.color_pair(3))
+        screen.addnstr(height - 2, 2, "↑↓/jk 选择  ←→/Tab 分类  / 搜索  Enter 执行  q 退出", width - 4, curses.color_pair(3))
         screen.refresh()
 
     def run_ui(self, screen) -> None:
@@ -2120,7 +2215,17 @@ done'''
             actions = self.current_actions()
             if key in (ord("q"), ord("Q")):
                 return
-            if key in (curses.KEY_LEFT, curses.KEY_BTAB, 9):
+            if key == ord("/"):
+                # 搜索：退出 curses 后用普通 input 输入（与 execute 的暂停输入同一模式），
+                # 结果挂到虚拟分类「搜索：<关键字>」下，用方向键选择后回车执行。
+                curses.endwin()
+                try:
+                    query = input("搜索动作（匹配 id/标题/描述，直接回车清除搜索）：").strip()
+                except (EOFError, KeyboardInterrupt):
+                    query = ""
+                self.set_search(query)
+                screen.clear()
+            elif key in (curses.KEY_LEFT, curses.KEY_BTAB, 9):
                 self.category = (self.category - 1) % len(self.categories)
                 self.selected = 0
             elif key == curses.KEY_RIGHT:

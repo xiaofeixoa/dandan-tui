@@ -12,7 +12,7 @@ WORKSPACE = APP_DIR.parent
 CONFIG = APP_DIR / "scripts.json"
 TCP_PROFILES = APP_DIR / "tcp_profiles.json"
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 
 def _effective_uid() -> int:

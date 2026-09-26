@@ -15,6 +15,8 @@ import unittest
 from functools import partial
 from pathlib import Path
 
+from yjl_tui import paths
+
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_TOOLS = ("bash", "sha256sum", "curl")
@@ -79,7 +81,7 @@ class LaunchE2ETests(unittest.TestCase):
             server.shutdown()
             server.server_close()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("yjl-tui 1.1.0", result.stdout)
+        self.assertIn(f"yjl-tui {paths.VERSION}", result.stdout)
         self.assertIn("配置 OK", result.stdout)
         self.assert_installed_tree()
 
@@ -87,7 +89,7 @@ class LaunchE2ETests(unittest.TestCase):
         """YJL_TUI_LOCAL_SOURCE 离线安装：不访问网络，SHA256SUMS 校验照常执行。"""
         result = self.run_launcher(ROOT / "launch.sh", {"YJL_TUI_LOCAL_SOURCE": to_bash_path(ROOT)})
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("yjl-tui 1.1.0", result.stdout)
+        self.assertIn(f"yjl-tui {paths.VERSION}", result.stdout)
         self.assertIn("配置 OK", result.stdout)
         self.assert_installed_tree()
 

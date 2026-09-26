@@ -49,6 +49,9 @@
 
 遇到「菜单里某个功能不对劲」时，先跑 `--doctor` 把输出贴出来，基本能定位是缺命令、缺文件还是清单过期。
 
+菜单内按 `/` 可跨全部分类搜索动作（匹配 id/标题/描述，回车确认后用方向键选择执行，
+直接回车清除搜索）；「最近使用」分类自动置顶显示最近用过的动作。
+
 本地运行时，所有 `local_script` 动作都直接使用本工程文件。`sing-box(fsr)` 与 `WARP 管理菜单（本地克隆）`分别使用 `scripts/fscarmen-sing-box.sh`、`scripts/fscarmen-warp.sh`，不需要从 fscarmen 下载入口脚本。涉及安装、网络、内核、服务、证书或防火墙的动作应以 root 运行；fscarmen 菜单后续下载依赖时仍需要网络。
 
 GitHub 仓库：`https://github.com/xiaofeixoa/dandan-tui`

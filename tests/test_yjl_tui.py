@@ -1,4 +1,5 @@
 """yjl_tui.tui 的分发注册表、辅助助手与入口参数测试（不依赖 Linux 环境）。"""
+import json
 import subprocess
 import sys
 import tempfile
@@ -201,6 +202,75 @@ class HelperTests(unittest.TestCase):
         with mock.patch("yjl_tui.tui.shutil.which", return_value=None), \
              mock.patch("sys.stdout", new_callable=StringIO):
             self.assertEqual(manager.docker_run(["ps"]), 127)
+
+
+class VirtualCategoryTests(unittest.TestCase):
+    ACTIONS = [
+        {"id": "act_a", "category": "c1", "title": "动作A", "description": "描述A", "kind": "builtin"},
+        {"id": "act_b", "category": "c2", "title": "动作B", "description": "描述B", "kind": "builtin"},
+        {"id": "act_c", "category": "c2", "title": "Nginx 特殊动作", "description": "描述C", "kind": "builtin"},
+    ]
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.state = Path(self._tmp.name) / "state"
+        self.state.mkdir(parents=True, exist_ok=True)
+        state_patcher = mock.patch("yjl_tui.tui.STATE", self.state)
+        state_patcher.start()
+        self.addCleanup(state_patcher.stop)
+        self.manager = tui.TUI({
+            "categories": [{"id": "c1", "title": "分类1"}, {"id": "c2", "title": "分类2"}],
+            "actions": self.ACTIONS,
+        })
+
+    def test_filter_actions_matches_id_title_description(self):
+        actions = tui.filter_actions(self.ACTIONS, "nginx")
+        self.assertEqual([a["id"] for a in actions], ["act_c"])
+        self.assertEqual([a["id"] for a in tui.filter_actions(self.ACTIONS, "ACT_A")], ["act_a"])
+        self.assertEqual(tui.filter_actions(self.ACTIONS, "  "), [])
+        self.assertEqual(tui.filter_actions(self.ACTIONS, "不存在"), [])
+
+    def test_recent_virtual_category_orders_by_last_time(self):
+        (self.state / "usage.json").write_text(
+            json.dumps({
+                "act_a": {"count": 2, "last": "2026-09-27T09:00:00"},
+                "act_b": {"count": 1, "last": "2026-09-27T10:00:00"},
+                "act_gone": {"count": 9, "last": "2026-09-27T11:00:00"},
+            }),
+            encoding="utf-8",
+        )
+        self.manager.rebuild_categories()
+        self.assertEqual(self.manager.categories[0]["id"], tui.TUI.RECENT_CATEGORY_ID)
+        # rebuild 保留当前分类选中；显式切到「最近使用」后应按最近时间倒序展示
+        self.manager.category = 0
+        self.assertEqual([a["id"] for a in self.manager.current_actions()], ["act_b", "act_a"])
+
+    def test_execute_records_usage_and_rebuild(self):
+        with mock.patch("yjl_tui.tui.STATE", self.state),              mock.patch("yjl_tui.tui.LOGS", self.state),              mock.patch.object(self.manager, "dispatch", return_value=0),              mock.patch("sys.stdout", new_callable=StringIO):
+            self.manager.execute({"id": "act_a", "title": "动作A"})
+        usage = json.loads((self.state / "usage.json").read_text(encoding="utf-8"))
+        self.assertIn("act_a", usage)
+        # 无使用记录时不出现「最近使用」；记录后 rebuild 出现在分类最前。
+        with mock.patch("yjl_tui.tui.STATE", self.state):
+            self.manager.rebuild_categories()
+        self.assertEqual(self.manager.categories[0]["id"], tui.TUI.RECENT_CATEGORY_ID)
+
+    def test_search_virtual_category_and_clear(self):
+        self.manager.set_search("nginx")
+        self.assertEqual(self.manager.search_query, "nginx")
+        self.assertEqual([a["id"] for a in self.manager.current_actions()], ["act_c"])
+        self.assertEqual(self.manager.categories[self.manager.category]["id"], tui.TUI.SEARCH_CATEGORY_ID)
+        self.manager.set_search("")
+        self.assertEqual(self.manager.search_matches, [])
+        self.assertNotIn(tui.TUI.SEARCH_CATEGORY_ID, [c["id"] for c in self.manager.categories])
+
+    def test_usage_file_corruption_falls_back_to_empty(self):
+        (self.state / "usage.json").write_text("{ broken", encoding="utf-8")
+        with mock.patch("yjl_tui.tui.STATE", self.state):
+            self.assertEqual(self.manager.recent_ids(), [])
+            self.manager.record_usage("act_a")  # 损坏文件被重置而不是永久失效
+        self.assertEqual(self.manager.recent_ids(), ["act_a"])
 
 
 class EntryTests(unittest.TestCase):
