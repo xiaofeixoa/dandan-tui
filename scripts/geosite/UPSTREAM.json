@@ -1,0 +1,7 @@
+{
+  "upstream": "https://github.com/SagerNet/sing-geosite",
+  "branch": "rule-set",
+  "commit": "22b28d5d602e63a3d65627b1fd8397188352aa08",
+  "updated_at_utc": "2026-08-16T08:57:03Z",
+  "rule_set_count": 1876
+}

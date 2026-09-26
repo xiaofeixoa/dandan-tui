@@ -1,0 +1,227 @@
+{
+  "nodeseek-bbr": {
+    "title": "Nodeseek 一键 BBR + FQ",
+    "source": "Nodeseek",
+    "settings": {
+      "net.core.default_qdisc": "fq",
+      "net.ipv4.tcp_congestion_control": "bbr"
+    }
+  },
+  "bbr-fq": {
+    "title": "BBR + FQ",
+    "source": "fsc 11",
+    "settings": {
+      "net.core.default_qdisc": "fq",
+      "net.ipv4.tcp_congestion_control": "bbr",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_mtu_probing": "1"
+    }
+  },
+  "bbr-fq-pie": {
+    "title": "BBR + FQ_PIE",
+    "source": "fsc 12",
+    "settings": {
+      "net.core.default_qdisc": "fq_pie",
+      "net.ipv4.tcp_congestion_control": "bbr",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_mtu_probing": "1"
+    }
+  },
+  "bbr-cake": {
+    "title": "BBR + CAKE",
+    "source": "fsc 13",
+    "settings": {
+      "net.core.default_qdisc": "cake",
+      "net.ipv4.tcp_congestion_control": "bbr",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_mtu_probing": "1"
+    }
+  },
+  "bbr2-fq": {
+    "title": "BBR2 + FQ",
+    "source": "fsc 14",
+    "settings": {
+      "net.core.default_qdisc": "fq",
+      "net.ipv4.tcp_congestion_control": "bbr2",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_mtu_probing": "1"
+    }
+  },
+  "bbr2-fq-pie": {
+    "title": "BBR2 + FQ_PIE",
+    "source": "fsc 15",
+    "settings": {
+      "net.core.default_qdisc": "fq_pie",
+      "net.ipv4.tcp_congestion_control": "bbr2",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_mtu_probing": "1"
+    }
+  },
+  "bbr2-cake": {
+    "title": "BBR2 + CAKE",
+    "source": "fsc 16",
+    "settings": {
+      "net.core.default_qdisc": "cake",
+      "net.ipv4.tcp_congestion_control": "bbr2",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_mtu_probing": "1"
+    }
+  },
+  "ecn-on": {
+    "title": "开启 ECN",
+    "source": "fsc 17",
+    "settings": {
+      "net.ipv4.tcp_ecn": "1"
+    }
+  },
+  "ecn-off": {
+    "title": "关闭 ECN",
+    "source": "fsc 18",
+    "settings": {
+      "net.ipv4.tcp_ecn": "0"
+    }
+  },
+  "ipv6-off": {
+    "title": "禁用 IPv6",
+    "source": "fsc 23",
+    "settings": {
+      "net.ipv6.conf.all.disable_ipv6": "1",
+      "net.ipv6.conf.default.disable_ipv6": "1",
+      "net.ipv6.conf.lo.disable_ipv6": "1"
+    }
+  },
+  "ipv6-on": {
+    "title": "开启 IPv6",
+    "source": "fsc 24",
+    "settings": {
+      "net.ipv6.conf.all.disable_ipv6": "0",
+      "net.ipv6.conf.default.disable_ipv6": "0",
+      "net.ipv6.conf.lo.disable_ipv6": "0",
+      "net.ipv6.conf.all.accept_ra": "2",
+      "net.ipv6.conf.default.accept_ra": "2"
+    }
+  },
+  "system-old": {
+    "title": "系统配置优化旧",
+    "source": "fsc 21",
+    "limits": true,
+    "settings": {
+      "net.ipv4.tcp_retries2": "8",
+      "net.ipv4.tcp_slow_start_after_idle": "0",
+      "fs.file-max": "1000000",
+      "fs.inotify.max_user_instances": "8192",
+      "net.ipv4.tcp_syncookies": "1",
+      "net.ipv4.tcp_fin_timeout": "30",
+      "net.ipv4.tcp_tw_reuse": "1",
+      "net.ipv4.ip_local_port_range": "1024 65000",
+      "net.ipv4.tcp_max_syn_backlog": "16384",
+      "net.ipv4.tcp_max_tw_buckets": "6000",
+      "net.ipv4.tcp_syn_retries": "1",
+      "net.ipv4.tcp_synack_retries": "1",
+      "net.core.somaxconn": "32768",
+      "net.core.netdev_max_backlog": "32768",
+      "net.ipv4.tcp_timestamps": "0",
+      "net.ipv4.tcp_max_orphans": "32768"
+    }
+  },
+  "system-new": {
+    "title": "系统配置优化新",
+    "source": "fsc 22",
+    "limits": true,
+    "settings": {
+      "net.ipv4.conf.all.route_localnet": "1",
+      "net.ipv4.ip_forward": "1",
+      "net.ipv4.conf.all.forwarding": "1",
+      "net.ipv4.conf.default.forwarding": "1",
+      "net.ipv6.conf.default.forwarding": "1",
+      "net.ipv6.conf.lo.forwarding": "1",
+      "net.ipv6.conf.all.disable_ipv6": "0",
+      "net.ipv6.conf.default.disable_ipv6": "0",
+      "net.ipv6.conf.all.accept_ra": "2",
+      "net.ipv6.conf.default.accept_ra": "2",
+      "net.core.netdev_max_backlog": "100000",
+      "net.core.netdev_budget": "50000",
+      "net.core.netdev_budget_usecs": "5000",
+      "net.core.rmem_max": "67108864",
+      "net.core.wmem_max": "67108864",
+      "net.core.rmem_default": "67108864",
+      "net.core.wmem_default": "67108864",
+      "net.core.optmem_max": "65536",
+      "net.core.somaxconn": "1000000",
+      "net.ipv4.conf.all.accept_redirects": "0",
+      "net.ipv4.conf.default.accept_redirects": "0",
+      "net.ipv4.conf.all.send_redirects": "0",
+      "net.ipv4.conf.default.send_redirects": "0",
+      "net.ipv4.conf.default.rp_filter": "0",
+      "net.ipv4.conf.all.rp_filter": "0",
+      "net.ipv4.tcp_keepalive_time": "600",
+      "net.ipv4.tcp_keepalive_intvl": "15",
+      "net.ipv4.tcp_keepalive_probes": "2",
+      "net.ipv4.tcp_syncookies": "1",
+      "net.ipv4.tcp_timestamps": "1",
+      "net.ipv4.tcp_fin_timeout": "15",
+      "net.ipv4.ip_local_port_range": "1024 65535",
+      "net.ipv4.tcp_max_tw_buckets": "5000",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_rmem": "4096 87380 67108864",
+      "net.ipv4.tcp_wmem": "4096 65536 67108864",
+      "net.ipv4.udp_rmem_min": "8192",
+      "net.ipv4.udp_wmem_min": "8192",
+      "net.ipv4.tcp_mtu_probing": "1",
+      "net.ipv4.tcp_autocorking": "0",
+      "net.ipv4.tcp_slow_start_after_idle": "0",
+      "net.ipv4.tcp_max_syn_backlog": "819200",
+      "net.ipv4.tcp_notsent_lowat": "16384",
+      "net.ipv4.tcp_ecn": "1",
+      "net.ipv4.tcp_ecn_fallback": "1",
+      "net.ipv6.conf.all.accept_redirects": "0",
+      "net.ipv6.conf.default.accept_redirects": "0",
+      "net.ipv4.neigh.default.gc_thresh3": "8192",
+      "net.ipv4.neigh.default.gc_thresh2": "4096",
+      "net.ipv4.neigh.default.gc_thresh1": "2048"
+    }
+  },
+  "system-aggressive": {
+    "title": "系统配置优化激进方案",
+    "source": "fsc 27",
+    "limits": true,
+    "dynamic": true,
+    "settings": {
+      "kernel.pid_max": "65535",
+      "kernel.numa_balancing": "0",
+      "kernel.sched_autogroup_enabled": "0",
+      "vm.swappiness": "5",
+      "vm.dirty_ratio": "5",
+      "vm.dirty_background_ratio": "2",
+      "vm.overcommit_memory": "1",
+      "net.core.netdev_max_backlog": "10000",
+      "net.core.rmem_default": "262144",
+      "net.core.wmem_default": "262144",
+      "net.core.somaxconn": "16384",
+      "net.core.optmem_max": "262144",
+      "net.netfilter.nf_conntrack_max": "262144",
+      "net.ipv4.tcp_fastopen": "3",
+      "net.ipv4.tcp_timestamps": "1",
+      "net.ipv4.tcp_tw_reuse": "1",
+      "net.ipv4.tcp_fin_timeout": "10",
+      "net.ipv4.tcp_slow_start_after_idle": "0",
+      "net.ipv4.tcp_max_tw_buckets": "32768",
+      "net.ipv4.tcp_sack": "1",
+      "net.ipv4.tcp_mtu_probing": "1",
+      "net.ipv4.tcp_notsent_lowat": "16384",
+      "net.ipv4.tcp_window_scaling": "1",
+      "net.ipv4.tcp_adv_win_scale": "2",
+      "net.ipv4.tcp_moderate_rcvbuf": "1",
+      "net.ipv4.tcp_no_metrics_save": "1",
+      "net.ipv4.tcp_max_syn_backlog": "65536",
+      "net.ipv4.tcp_max_orphans": "32768",
+      "net.ipv4.tcp_synack_retries": "2",
+      "net.ipv4.tcp_syn_retries": "2",
+      "net.ipv4.tcp_syncookies": "1",
+      "net.ipv4.tcp_rfc1337": "0",
+      "net.ipv4.ip_local_port_range": "1024 65535",
+      "net.ipv4.route.gc_timeout": "100",
+      "net.ipv4.neigh.default.gc_stale_time": "120"
+    }
+  }
+}

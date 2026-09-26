@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run unit and smoke tests
+        run: python -m unittest discover -s tests -v
+
+      - name: bash -n all tracked shell scripts
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            bash -n "$file"
+          done < <(git ls-files '*.sh')
+
+      - name: Verify launch.sh SHA256SUMS is up to date
+        run: bash scripts/check-launch-manifest.sh

@@ -1,0 +1,12 @@
+# 统一 LF，保证跨平台 checkout 后 launch.sh 的 SHA256SUMS 校验仍成立。
+* text=auto eol=lf
+
+# 二进制发布物：禁止任何换行转换。
+*.srs binary
+*.tar.gz binary
+*.gpg binary
+*.png binary
+*.jpg binary
+tools/nft-forward/nft-agent binary
+tools/nft-forward/nft-server binary
+scripts/tcp-brutal/dkms.tar.gz binary
