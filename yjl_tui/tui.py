@@ -1485,6 +1485,25 @@ class TUI:
                     f.write(block)
         return result
 
+    @staticmethod
+    def prompt_script_args(prompt: str) -> list[str]:
+        """让合集里的参数型脚本（如 DD 重装）能从菜单传参。
+
+        shlex 解析以支持引号包裹的密码等；解析失败或留空时返回空列表——
+        对 DD 类脚本这意味着只显示用法，是最安全的回退。
+        """
+        raw = input(f"{prompt}：").strip()
+        if not raw:
+            print("未输入参数，按脚本默认行为执行。")
+            return []
+        try:
+            args = shlex.split(raw)
+        except ValueError as exc:
+            print(f"参数解析失败（{exc}），将不带参数执行（通常会显示用法）。")
+            return []
+        print(f"附加参数：{shlex.join(args)}")
+        return args
+
     def online(self, action: dict, log: Path) -> int:
         path = self.download(action, log)
         if not path:
@@ -1494,8 +1513,12 @@ class TUI:
             return 2
         if action.get("mode") == "fnm":
             return self.run_fnm(path, log)
+        args = list(map(str, action.get("args", [])))
+        prompt = action.get("prompt_args")
+        if prompt:
+            args.extend(self.prompt_script_args(prompt))
         env = action.get("env") if isinstance(action.get("env"), dict) else None
-        return self.interactive([interpreter, str(path), *map(str, action.get("args", []))], log, env)
+        return self.interactive([interpreter, str(path), *args], log, env)
 
     def local_script(self, action: dict, log: Path) -> int:
         relative = action.get("path")

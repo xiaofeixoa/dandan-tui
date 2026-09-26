@@ -72,6 +72,7 @@ trap cleanup EXIT
 
 download() {
     local name="$1"
+    printf '获取 %s\n' "$name"
     mkdir -p -- "${TEMP_DIR}/$(dirname -- "$name")"
     local url="${BASE_URL}/${name}"
     if [ -n "$CACHE_BUSTER" ]; then
@@ -97,6 +98,7 @@ acquire_files() {
         fi
         for entry in "${FILES[@]}"; do
             path="${entry%%|*}"
+            printf '本地复制 %s\n' "$path"
             mkdir -p -- "${TEMP_DIR}/$(dirname -- "$path")"
             cp -a -- "${LOCAL_SOURCE}/${path}" "${TEMP_DIR}/${path}"
         done

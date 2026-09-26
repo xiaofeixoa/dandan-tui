@@ -43,6 +43,8 @@
 - 自包含化：`nginx-ui` 网页面板改为仓库内固定快照（`tools/nginx-ui/`，v2.5.7 三架构归档 +
   服务文件 + 改造后安装器，SHA256SUMS 校验、支持 `NGINX_UI_LOCAL_SOURCE` 离线安装），
   运行时不再调用 `dandan8511` 的任何工程；新增守门测试断言运行时文件无旧仓库 URL。
+- online 动作支持 `prompt_args` 执行前参数输入（shlex 解析、支持引号；留空/解析失败
+  回退为无参数运行），DD 重装类脚本因此可从菜单直接传参。
 - 新增「nodeseek合集」分类：收录 NodeSeek 社区合集帖的 37 个在线脚本入口
   （DD 重装、综合/性能测试、流媒体与 IP 质量、测速、回程、功能与环境脚本、杜甫检测），
   已剔除失效来源（bench.im/git.io/ghproxy/DNS-Alice-Unlock）。
@@ -50,7 +52,7 @@
   直接从本地工程目录复制全部文件（不访问网络），SHA256SUMS 校验照常执行——用于 GitHub
   不可达或完全离线的 VPS。
 - 新增 `tests/test_launch_e2e.py`：launch.sh 全链路端到端测试（本机 HTTP 真实下载 /
-  离线目录 / 缺文件拒绝三场景），部署级回归有了守门测试，套件 98 → 101 项。
+  离线目录 / 缺文件拒绝三场景），部署级回归有了守门测试，套件 98 → 103 项。
 - curses 初始化失败（TERM 异常等）改为友好报错退出；singbox_manager 交互循环不再被
   磁盘/命令层的意外异常带走。
 - `launch.sh` 对 `YJL_TUI_REF` 做合法性校验（只允许 ref 字符），杜绝拼进 URL 的畸形值；

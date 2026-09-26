@@ -117,6 +117,44 @@ class HelperTests(unittest.TestCase):
              mock.patch("sys.stdout", new_callable=StringIO):
             self.assertEqual(tui.TUI._run_captured(["x"], None, 1, "Docker "), 124)
 
+    def test_prompt_script_args_parses_quoted_values(self):
+        with mock.patch("builtins.input", return_value="-debian 12 -pwd 'my password'"), \
+             mock.patch("sys.stdout", new_callable=StringIO):
+            self.assertEqual(tui.TUI.prompt_script_args("参数"), ["-debian", "12", "-pwd", "my password"])
+
+    def test_prompt_script_args_empty_and_invalid_fall_back_to_no_args(self):
+        with mock.patch("builtins.input", return_value=""), mock.patch("sys.stdout", new_callable=StringIO):
+            self.assertEqual(tui.TUI.prompt_script_args("参数"), [])
+        with mock.patch("builtins.input", return_value="-debian '12"), mock.patch("sys.stdout", new_callable=StringIO):
+            self.assertEqual(tui.TUI.prompt_script_args("参数"), [])
+
+    def test_online_prompt_args_are_appended_after_static_args(self):
+        manager = tui.TUI({"categories": [], "actions": []})
+        action = {
+            "id": "ns_dd_leitbogioro", "url": "https://example.invalid/install.sh",
+            "args": [], "prompt_args": "输入 InstallNET 参数",
+        }
+        with mock.patch.object(manager, "download", return_value=Path("/tmp/install.sh")), \
+             mock.patch.object(manager, "syntax_ok", return_value=True), \
+             mock.patch("builtins.input", return_value="-debian 12 -pwd 'pw'"), \
+             mock.patch.object(manager, "interactive", return_value=0) as interactive, \
+             mock.patch("sys.stdout", new_callable=StringIO):
+            rc = manager.online(action, Path('/tmp/demo.log'))
+        self.assertEqual(rc, 0)
+        argv = interactive.call_args.args[0]
+        self.assertEqual(argv, ["bash", str(Path("/tmp/install.sh")), "-debian", "12", "-pwd", "pw"])
+
+    def test_online_without_prompt_keeps_static_args_only(self):
+        manager = tui.TUI({"categories": [], "actions": []})
+        action = {"id": "ns_bench", "url": "https://example.invalid/bench.sh", "args": ["--fast"]}
+        with mock.patch.object(manager, "download", return_value=Path("/tmp/bench.sh")), \
+             mock.patch.object(manager, "syntax_ok", return_value=True), \
+             mock.patch("builtins.input", side_effect=AssertionError("无 prompt_args 不应提示")), \
+             mock.patch.object(manager, "interactive", return_value=0) as interactive, \
+             mock.patch("sys.stdout", new_callable=StringIO):
+            self.assertEqual(manager.online(action, Path('/tmp/demo.log')), 0)
+        self.assertEqual(interactive.call_args.args[0], ["bash", str(Path("/tmp/bench.sh")), "--fast"])
+
     def test_docker_run_returns_127_without_docker(self):
         manager = tui.TUI({"categories": [], "actions": []})
         with mock.patch("yjl_tui.tui.shutil.which", return_value=None), \
