@@ -20,6 +20,7 @@
   - [Docker Hub Mirror 服务端](#docker-hub-mirror-服务端)
 - [高级工具](#高级工具)
   - [猴哥 nft-forward 本地副本](#猴哥-nft-forward-本地副本)
+  - [nodeseek合集（社区脚本）](#nodeseek合集社区脚本)
   - [yjl-argo（Cloudflare Tunnel）](#yjl-argocloudflare-tunnel)
 - [维护与开发](#维护与开发)
   - [更新日志](#更新日志)
