@@ -1,3 +1,4 @@
+import ast
 import hashlib
 import json
 import os
@@ -23,6 +24,41 @@ WINDOWS_CI_BASH_SUBPROCESS_SKIP = unittest.skipIf(
     os.environ.get("CI") == "true" and os.name == "nt",
     "windows runner 的 bash 子进程行为不稳定；ubuntu CI 为该 Linux 脚本的覆盖主路径",
 )
+
+# 真实 spawn bash 家族可执行文件的检测（守门测试用，见 WindowsCiBashSurfaceTests）。
+_BASH_SPAWN_METHODS = frozenset({"run", "Popen", "call", "check_call", "check_output"})
+_BASH_FAMILY = frozenset({"bash", "sh", "cygpath"})
+
+
+def bash_spawn_test_functions(source: str) -> dict:
+    """解析测试源码，返回 {函数名: 是否挂了 WINDOWS_CI_BASH_SUBPROCESS_SKIP}。
+
+    只收录真实 spawn（subprocess.<method>(["bash", ...]) 形式，argv 含
+    bash/sh/cygpath）的函数；mock.patch 字符串与 sys.executable 调用不算。
+    """
+    result = {}
+    for fn in (n for n in ast.walk(ast.parse(source)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))):
+        spawns = False
+        for node in ast.walk(fn):
+            if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+                continue
+            if node.func.attr not in _BASH_SPAWN_METHODS:
+                continue
+            if not (isinstance(node.func.value, ast.Name) and node.func.value.id == "subprocess"):
+                continue
+            if not node.args or not isinstance(node.args[0], (ast.List, ast.Tuple)):
+                continue
+            argv = {e.value for e in node.args[0].elts if isinstance(e, ast.Constant) and isinstance(e.value, str)}
+            if argv & _BASH_FAMILY:
+                spawns = True
+                break
+        if spawns:
+            decorated = any(
+                isinstance(d, ast.Name) and d.id == "WINDOWS_CI_BASH_SUBPROCESS_SKIP"
+                for d in fn.decorator_list
+            )
+            result[fn.name] = decorated
+    return result
 
 # TUI 实现拆分在 yjl_tui 包内；针对类方法行为的源码字符串断言统一读这里。
 TUI_SOURCE = (ROOT / "yjl_tui" / "tui.py").read_text(encoding="utf-8")
@@ -775,6 +811,56 @@ class LocalBehaviorTests(unittest.TestCase):
         self.assertEqual(tui.safe_name("中文 action"), "action")
         self.assertIsNotNone(tui.TUI.builtin("domain_latency"))
         self.assertTrue(tui.TUI({"categories": [], "actions": []}).confirm({"risk": "danger"}))
+
+
+class WindowsCiBashSurfaceTests(unittest.TestCase):
+    """windows runner bash 抖动的根因守门（CI 数据复盘 + 95de471 的固化）。
+
+    复盘结论：run 11-24 的 windows 失败全部落在真实 spawn bash 的测试上
+    （每轮轮换、重试救不回）；95de471 把暴露面全部挂 skip 后 windows job
+    此后 10/10 绿（唯一红 run 27 是 ubuntu 同轮共挂的真实回归）。
+    本守门把「新增 bash 子进程测试必须挂 WINDOWS_CI_BASH_SUBPROCESS_SKIP」
+    从口头约定变成 CI 强制，防止非确定性抖动复发。
+    """
+
+    def test_windows_ci_modules_gate_every_bash_subprocess_spawn(self):
+        ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertIn("\n  windows:", ci, "ci.yml 结构变化：找不到 windows 任务，守门需同步")
+        win_section = ci.split("\n  windows:", 1)[1]
+        modules = sorted(set(re.findall(r"python -m unittest (tests\.[A-Za-z0-9_.]+)", win_section)))
+        self.assertTrue(modules, "windows 任务未解析到 unittest 模块——ci.yml 写法变化，守门需同步")
+        offenders = {}
+        for mod in modules:
+            path = ROOT / "tests" / (mod.split(".")[1] + ".py")
+            self.assertTrue(path.is_file(), f"windows 任务引用的模块找不到文件: {mod}")
+            for name, decorated in bash_spawn_test_functions(path.read_text(encoding="utf-8")).items():
+                if not decorated:
+                    offenders[f"{path.name}:{name}"] = mod
+        self.assertEqual(
+            offenders, {},
+            "windows 任务会执行的模块里存在未挂 WINDOWS_CI_BASH_SUBPROCESS_SKIP 的 bash 子进程测试"
+            "（windows runner 非确定性抖动的根因复发面）: " + json.dumps(offenders, ensure_ascii=False),
+        )
+
+    def test_bash_spawn_gate_detects_violations_and_accepts_gated_code(self):
+        # 负例：未挂 skip 的 bash spawn 必须被检出（红）
+        leaky = "import subprocess\n\ndef leaky():\n    subprocess.run(['bash', '-n', 'x.sh'], check=True)\n"
+        self.assertEqual(bash_spawn_test_functions(leaky), {"leaky": False})
+        # 正例：挂了 skip 的放行（绿）
+        gated = (
+            "import subprocess\n\n"
+            "@WINDOWS_CI_BASH_SUBPROCESS_SKIP\n"
+            "def fine():\n    subprocess.run(['bash', '-n', 'x.sh'], check=True)\n"
+        )
+        self.assertEqual(bash_spawn_test_functions(gated), {"fine": True})
+        # 非 spawn：mock 字符串与 sys.executable 调用不算暴露面
+        harmless = (
+            "import subprocess, sys\nfrom unittest import mock\n\n"
+            "def ok():\n"
+            "    with mock.patch('x.subprocess.run'):\n        pass\n"
+            "    subprocess.run([sys.executable, '-m', 'py_compile', 'm.py'], check=True)\n"
+        )
+        self.assertEqual(bash_spawn_test_functions(harmless), {})
 
 
 if __name__ == "__main__":
