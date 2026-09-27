@@ -270,7 +270,113 @@ class VirtualCategoryTests(unittest.TestCase):
         with mock.patch("yjl_tui.tui.STATE", self.state):
             self.assertEqual(self.manager.recent_ids(), [])
             self.manager.record_usage("act_a")  # 损坏文件被重置而不是永久失效
-        self.assertEqual(self.manager.recent_ids(), ["act_a"])
+            self.assertEqual(self.manager.recent_ids(), ["act_a"])
+
+
+class FakeScreen:
+    """run_ui/draw 所需的最小 screen 接口；按键由脚本回放。"""
+
+    def __init__(self, keys):
+        self._keys = list(keys)
+
+    def getmaxyx(self):
+        return 24, 100
+
+    def erase(self):
+        pass
+
+    def addnstr(self, *args):
+        pass
+
+    def vline(self, *args):
+        pass
+
+    def hline(self, *args):
+        pass
+
+    def refresh(self):
+        pass
+
+    def clear(self):
+        pass
+
+    def keypad(self, *args):
+        pass
+
+    def getch(self):
+        return self._keys.pop(0) if self._keys else ord("q")
+
+
+@unittest.skipUnless(tui.curses is not None, "需要 curses 模块（windows 装 windows-curses）")
+class UITests(unittest.TestCase):
+    """用 FakeScreen 驱动 run_ui：导航、Tab 切分类、/ 搜索、Enter 执行、最近使用联动。"""
+
+    ACTIONS = [
+        {"id": "act_swap", "category": "c1", "title": "Swap 工具", "description": "d", "kind": "builtin"},
+        {"id": "act_docker", "category": "c1", "title": "Docker 工具", "description": "d", "kind": "builtin"},
+        {"id": "act_bench", "category": "c2", "title": "Bench 测试", "description": "d", "kind": "builtin"},
+    ]
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.state = Path(self._tmp.name) / "state"
+        self.state.mkdir(parents=True, exist_ok=True)
+        for target, value, create in (
+            ("yjl_tui.tui.STATE", self.state, False),
+            ("yjl_tui.tui.LOGS", self.state, False),
+            ("yjl_tui.tui.curses.curs_set", mock.Mock(), False),
+            ("yjl_tui.tui.curses.use_default_colors", mock.Mock(), False),
+            ("yjl_tui.tui.curses.init_pair", mock.Mock(), False),
+            ("yjl_tui.tui.curses.endwin", mock.Mock(), False),
+            ("yjl_tui.tui.curses.color_pair", mock.Mock(return_value=0), False),
+            ("yjl_tui.tui.curses.ACS_VLINE", 0, True),
+            ("yjl_tui.tui.curses.ACS_HLINE", 0, True),
+        ):
+            patcher = mock.patch(target, value, create=create)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        self.manager = tui.TUI({
+            "categories": [{"id": "c1", "title": "分类1"}, {"id": "c2", "title": "分类2"}],
+            "actions": self.ACTIONS,
+        })
+
+    def run_keys(self, keys, inputs=None):
+        screen = FakeScreen(keys)
+        input_iter = iter(inputs or [])
+        with mock.patch("builtins.input", side_effect=lambda *_: next(input_iter, "")), \
+             mock.patch("sys.stdout", new_callable=StringIO):
+            self.manager.run_ui(screen)
+
+    def test_navigation_moves_selection_and_quit(self):
+        self.run_keys([ord("j"), ord("j"), ord("k"), ord("q")])
+        self.assertEqual(self.manager.selected, 1)
+        self.assertFalse(self.manager.should_exit)
+
+    def test_tab_switches_category(self):
+        self.run_keys([9, ord("q")])
+        # 初始无使用记录时分类 = [c1, c2]，Tab 后应到 c2
+        self.assertEqual(self.manager.categories[self.manager.category]["id"], "c2")
+
+    def test_search_key_filters_and_enter_executes(self):
+        with mock.patch.object(self.manager, "dispatch", return_value=0):
+            self.run_keys([ord("/"), 10, ord("q")], inputs=["docker"])
+        usage = json.loads((self.state / "usage.json").read_text(encoding="utf-8"))
+        self.assertIn("act_docker", usage)
+        self.assertEqual(self.manager.categories[self.manager.category]["id"], tui.TUI.SEARCH_CATEGORY_ID)
+
+    def test_enter_executes_and_recent_category_appears(self):
+        recorded = []
+        with mock.patch.object(self.manager, "dispatch", side_effect=lambda a, log: recorded.append(a["id"]) or 0):
+            self.run_keys([10, ord("q")])
+        self.assertEqual(recorded, ["act_swap"])
+        self.assertTrue((self.state / "usage.json").is_file())
+        self.assertEqual(self.manager.categories[0]["id"], tui.TUI.RECENT_CATEGORY_ID)
+
+    def test_search_without_match_keeps_menu_usable(self):
+        self.run_keys([ord("/"), ord("q")], inputs=["不存在的关键字"])
+        self.assertEqual(self.manager.search_matches, [])
+        self.assertTrue(self.manager.search_query)
 
 
 class EntryTests(unittest.TestCase):

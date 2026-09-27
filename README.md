@@ -433,7 +433,9 @@ bash scripts/check-launch-manifest.sh
 ./run.sh --check
 ```
 
-`tests/` 覆盖：scripts.json 契约、launch.sh 下载清单与 SHA256SUMS 新鲜度、launch.sh 全链路端到端（真实 HTTP 下载 / 离线目录 / 缺文件拒绝）、快照版本与哈希固定、`bash -n` 语法检查、`py_compile`、内核规划纯函数、sing-box 状态/分片/交互路径、TUI 分发注册表与助手语义、nginx 解析/校验/写入守卫、`--doctor` 检查项。GitHub Actions（`.github/workflows/ci.yml`）在每次 push/PR 时运行同一套检查。新增本地脚本菜单时，务必把文件加入 `launch.sh` 的 `FILES` 清单并重新生成根目录 `SHA256SUMS`，否则测试会失败。
+`tests/` 覆盖：scripts.json 契约、launch.sh 下载清单与 SHA256SUMS 新鲜度、launch.sh 全链路端到端（真实 HTTP 下载 / 离线目录 / 缺文件拒绝）、快照版本与哈希固定、`bash -n` 语法检查、`py_compile`、内核规划纯函数、sing-box 状态/分片/交互路径、TUI 分发注册表与助手语义、curses UI 循环（FakeScreen 驱动导航/搜索/执行）、nginx 解析/校验/写入守卫、`--doctor` 检查项。GitHub Actions（`.github/workflows/ci.yml`）在每次 push/PR 时运行 ubuntu 测试 + shellcheck + windows 平台回归（windows 任务安装 windows-curses 后同样运行 UI 测试）。
+
+本机开发依赖见 `requirements-dev.txt`（仅 Windows 本地需要 windows-curses；运行时零第三方依赖）。新增本地脚本菜单时，务必把文件加入 `launch.sh` 的 `FILES` 清单并重新生成根目录 `SHA256SUMS`，否则测试会失败。
 
 ### 更新 fscarmen 快照的约定
 
