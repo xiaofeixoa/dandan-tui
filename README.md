@@ -102,7 +102,6 @@ tools/nft-forward/      nft-forward 固定版本的本地工具包
 tools/nginx-ui/         nginx-ui v2.5.7 固定快照（安装器 + 三架构归档 + 服务文件）
 yjl-argo/               yjl-argo（Cloudflare Tunnel 管理器）
 tests/                  unittest 套件（smoke / kernel / singbox）
-docs/                   设计与实施记录
 ```
 
 ## 系统与内核
