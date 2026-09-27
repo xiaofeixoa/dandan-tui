@@ -110,9 +110,13 @@ acquire_files() {
     # 并发子 shell 需要这些变量与函数；本地复制的 cp 分支不经过这里。
     export -f download
     export BASE_URL CACHE_BUSTER TEMP_DIR
-    { printf '%s\n' "$MANIFEST"
-      for entry in "${FILES[@]}"; do printf '%s\n' "${entry%%|*}"; done
-    } | if ! xargs -P 8 -n 1 bash -c 'download "$1"' _; then
+    download_all() {
+        # shellcheck disable=SC2016  # $1 由子 shell 展开，此处单引号是有意为之
+        { printf '%s\n' "$MANIFEST"
+          for entry in "${FILES[@]}"; do printf '%s\n' "${entry%%|*}"; done
+        } | xargs -P 8 -n 1 bash -c 'download "$1"' _
+    }
+    if ! download_all; then
         printf '%s\n' '错误：部分文件下载失败，请重试。' >&2
         exit 1
     fi

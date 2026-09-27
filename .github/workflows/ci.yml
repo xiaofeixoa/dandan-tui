@@ -83,6 +83,7 @@ jobs:
         run: python -m pip install windows-curses
       - name: Disable runner-local Defender real-time scanning (reduces flaky process spawns)
         shell: powershell
+        continue-on-error: true
         run: Set-MpPreference -DisableRealtimeMonitoring $true
       - name: Prepare Git Bash tool PATH
         shell: bash
