@@ -32,7 +32,7 @@ import nginx_manager  # noqa: F401
 from nginx_manager import run_nginx_manager
 
 from . import tcp_brutal
-from .doctor import run_doctor
+from .doctor import run_doctor, run_network_probe
 from .paths import (
     APP_DIR,
     CACHE,
@@ -2262,12 +2262,17 @@ done'''
 
 def main() -> int:
     if "--help" in sys.argv or "-h" in sys.argv:
-        print("用法：tui.py [--list|--check|--doctor|--version]")
+        print("用法：tui.py [--list|--check|--doctor|--doctor --net|--version]")
         return 0
     if "--version" in sys.argv:
         print(f"yjl-tui {VERSION}")
         return 0
     if "--doctor" in sys.argv:
+        net = "--net" in sys.argv
+        if net:
+            sys.argv.remove("--net")
+            run_network_probe()
+            print()
         return run_doctor()
     try:
         config = read_config()
@@ -2296,6 +2301,12 @@ def main() -> int:
     if curses is None:
         print("当前 Python 缺少 curses 模块；菜单界面只在 POSIX 终端运行。", file=sys.stderr)
         return 2
+    try:
+        import locale
+
+        locale.setlocale(locale.LC_ALL, "")
+    except locale.Error:
+        pass  # 异常 locale 下仍可运行，仅中文宽度渲染可能受影响
     terminal_notice()
     try:
         curses.wrapper(manager.run_ui)

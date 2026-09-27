@@ -160,6 +160,56 @@ def collect_checks(
     return results
 
 
+def collect_network_targets(app_dir: Path | None = None) -> list[str]:
+    """从 scripts.json 收集所有 online / tcp_online 动作的去重 URL（排序稳定）。"""
+    app_dir = app_dir or APP_DIR
+    try:
+        data = json.loads((app_dir / "scripts.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    urls = {
+        action["url"].strip()
+        for action in data.get("actions", [])
+        if action.get("kind") in ("online", "tcp_online")
+        and isinstance(action.get("url"), str)
+        and action["url"].strip()
+    }
+    return sorted(urls)
+
+
+def probe_urls(urls: list[str], timeout: float = 10.0, workers: int = 8) -> list[tuple[str, str]]:
+    """并发探测 URL 可达性；返回 (url, 结果) 列表，结果为 HTTP 状态码或 ERR 说明。"""
+    import concurrent.futures
+    import urllib.error
+    import urllib.request
+
+    def probe(url: str) -> tuple[str, str]:
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "yjl-tui-doctor"}, method="GET")
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                resp.read(512)
+            return url, f"HTTP {resp.status}"
+        except urllib.error.HTTPError as exc:
+            return url, f"HTTP {exc.code}"
+        except Exception as exc:
+            return url, f"ERR {type(exc).__name__}: {exc}"
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(probe, urls))
+
+
+def run_network_probe(out=None) -> None:
+    printer = out or sys.stdout
+    targets = collect_network_targets()
+    if not targets:
+        print("无 online 动作 URL 可探测。", file=printer)
+        return
+    print(f"探测 {len(targets)} 个在线动作 URL（每个最长等待 10 秒）……", file=printer)
+    for url, status in probe_urls(targets):
+        mark = "✅" if status.startswith("HTTP 2") or status.startswith("HTTP 3") else "❌"
+        print(f"{mark} {status:<10} {url}", file=printer)
+
+
 def run_doctor(out=None) -> int:
     """打印诊断结果；任一 fail 时返回 1。"""
     printer = out or sys.stdout

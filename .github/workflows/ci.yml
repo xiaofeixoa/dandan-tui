@@ -27,6 +27,9 @@ jobs:
       - name: Verify launch.sh SHA256SUMS is up to date
         run: bash scripts/check-launch-manifest.sh
 
+      - name: yjl-argo bash test suite
+        run: bash yjl-argo/tests/test.sh
+
   shellcheck:
     runs-on: ubuntu-latest
     steps:

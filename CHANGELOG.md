@@ -19,6 +19,13 @@
 - 全量审计 62 个 online 动作的交互形态并以
   `test_online_actions_declare_interaction_model` 固化，未声明的新动作会被 CI 拒绝。
 
+### 诊断与 CI
+
+- `--doctor --net`：并发探测全部 online/tcp_online 动作 URL 可达性，
+  一眼看出 VPS 出口网络封了哪些脚本源（如 GitHub 被墙场景）。
+- curses 界面前补 `locale.setlocale`（宽字符渲染的标准做法）。
+- yjl-argo 自带的 bash 测试套件接入 CI。
+
 ### 菜单可用性
 
 - TUI 内按 `/` 跨全部分类搜索动作（匹配 id/标题/描述），结果挂到虚拟分类下选择执行。

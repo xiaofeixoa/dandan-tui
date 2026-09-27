@@ -87,6 +87,47 @@ class DoctorTests(unittest.TestCase):
             results = doctor.collect_checks(app_dir=app, cache_dir=self.cache, logs_dir=self.logs, state_dir=self.state)
             self.assertIn("fail", self.levels(results))
 
+    def test_collect_network_targets_dedupes_and_sorts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            app = Path(tmp)
+            make_app(app, actions=[
+                {"id": "a", "category": "c", "title": "t", "description": "d",
+                 "kind": "online", "url": "https://z.example/x.sh", "interpreter": "bash", "args": []},
+                {"id": "b", "category": "c", "title": "t", "description": "d",
+                 "kind": "online", "url": "https://a.example/y.sh", "interpreter": "bash", "args": []},
+                {"id": "c", "category": "c", "title": "t", "description": "d",
+                 "kind": "tcp_online", "url": "https://a.example/y.sh", "interpreter": "bash", "args": []},
+                {"id": "d", "category": "c", "title": "t", "description": "d", "kind": "builtin"},
+            ])
+            targets = doctor.collect_network_targets(app_dir=app)
+        self.assertEqual(targets, ["https://a.example/y.sh", "https://z.example/x.sh"])
+
+    def test_probe_urls_reports_ok_and_dead(self):
+        import http.server
+        import threading
+
+        class _OKHandler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"ok")
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _OKHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            live = f"http://127.0.0.1:{server.server_address[1]}/live"
+            dead = "http://127.0.0.1:1/dead"
+            results = dict(doctor.probe_urls([live, dead], timeout=3, workers=2))
+        finally:
+            server.shutdown()
+            server.server_close()
+        self.assertTrue(results[live].startswith("HTTP 200"))
+        self.assertTrue(results[dead].startswith("ERR"))
+
     def test_run_doctor_exit_code(self):
         class Buffer:
             @staticmethod
