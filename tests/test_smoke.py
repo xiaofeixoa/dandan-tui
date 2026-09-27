@@ -16,6 +16,14 @@ sys.path.insert(0, str(ROOT))
 
 import tui
 
+# windows runner 的 Git Bash 对「source 脚本 + bash 子进程」类测试行为不稳定
+# （每轮挂不同的用例且日志接口需认证无法深查）；这些是 Linux 脚本行为测试，
+# ubuntu CI 是覆盖主路径，本地 Git Bash 亦验证通过。
+WINDOWS_CI_BASH_SUBPROCESS_SKIP = unittest.skipIf(
+    os.environ.get("CI") == "true" and os.name == "nt",
+    "windows runner 的 bash 子进程行为不稳定；ubuntu CI 为该 Linux 脚本的覆盖主路径",
+)
+
 # TUI 实现拆分在 yjl_tui 包内；针对类方法行为的源码字符串断言统一读这里。
 TUI_SOURCE = (ROOT / "yjl_tui" / "tui.py").read_text(encoding="utf-8")
 
@@ -359,14 +367,6 @@ class ConfigSmokeTests(unittest.TestCase):
         self.assertTrue((ROOT / "scripts/tcp-brutal/dkms.tar.gz").is_file())
         self.assertTrue((ROOT / "scripts/tcp-brutal/UPSTREAM.md").is_file())
 
-    # windows runner 的 Git Bash 对「source 脚本 + bash 子进程」类测试行为不稳定：
-    # 两次运行分别有两个不同的测试失败且无法复现/读日志（日志接口需认证）。
-    # 这些是 Linux 脚本行为测试，ubuntu CI 是覆盖主路径，本地 Git Bash 亦验证通过。
-    WINDOWS_CI_BASH_SUBPROCESS_SKIP = unittest.skipIf(
-        os.environ.get("CI") == "true" and os.name == "nt",
-        "windows runner 的 bash 子进程行为不稳定；ubuntu CI 为该 Linux 脚本的覆盖主路径",
-    )
-
     @WINDOWS_CI_BASH_SUBPROCESS_SKIP
     def test_tcp_brutal_manager_validates_and_normalizes_ipv4_prefixes(self):
         script = "source scripts/tcp-brutal-manager.sh; normalize_prefix 188.165.226.219; normalize_prefix 1.2.3.4/24; ! normalize_prefix 1.2.3.999/32; ! normalize_prefix 1.2.3.4/33; is_rate 1000; ! is_rate 0"
@@ -709,6 +709,7 @@ rules:
 
 
 class LocalBehaviorTests(unittest.TestCase):
+    @WINDOWS_CI_BASH_SUBPROCESS_SKIP
     def test_shell_and_python_syntax(self):
         subprocess.run(["bash", "-n", "launch.sh"], cwd=ROOT, check=True)
         subprocess.run(["bash", "-n", "run.sh"], cwd=ROOT, check=True)
@@ -732,6 +733,7 @@ class LocalBehaviorTests(unittest.TestCase):
         for module in ("yjl_tui/paths.py", "yjl_tui/probes.py", "yjl_tui/tcp_brutal.py", "yjl_tui/doctor.py", "yjl_tui/tui.py"):
             subprocess.run([sys.executable, "-m", "py_compile", module], cwd=ROOT, check=True)
 
+    @WINDOWS_CI_BASH_SUBPROCESS_SKIP
     def test_noninteractive_commands(self):
         env = {
             **__import__("os").environ,
