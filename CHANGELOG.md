@@ -31,6 +31,13 @@
 - windows-latest 平台回归任务：全量单测在 Git Bash 下运行（PYTHONUTF8 处理编码、
   /usr/bin 工具路径、按模块重试 + continue-on-error 抗 runner 抖动）。
 
+### 菜单可用性（补充）
+
+- `backup_file` 引入保留策略：每路径保留最早 1 份（restore_tcp_file 的「原始文件」）
+  + 最近 9 份，长期使用不再无限堆积 `.yjl-tui.bak.*`。
+- curses 界面首次获得测试覆盖：FakeScreen 驱动 `run_ui`（导航、/ 搜索、Enter 执行、
+  最近使用联动），windows CI 安装 windows-curses 后同样运行。
+
 ### 修复
 
 - launch.sh 的 python3 探测与 run.sh 对齐（先验证可执行再用）。

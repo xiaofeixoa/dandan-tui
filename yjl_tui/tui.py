@@ -242,12 +242,23 @@ class TUI:
         print("此功能需要 root 权限，请使用 sudo 或 root 登录后启动 TUI。")
         return False
 
-    @staticmethod
-    def backup_file(path: Path) -> Path | None:
+    BACKUP_KEEP = 9
+
+    @classmethod
+    def backup_file(cls, path: Path) -> Path | None:
         if not path.exists():
             return None
         backup = path.with_name(path.name + ".yjl-tui.bak." + time.strftime("%Y%m%d-%H%M%S"))
         shutil.copy2(path, backup)
+        # 保留最早 1 份（restore_tcp_file 以其为「原始文件」）+ 最近 9 份，避免无限堆积。
+        backups = sorted(path.parent.glob(path.name + ".yjl-tui.bak.*"))
+        keep = {backups[0], *backups[-cls.BACKUP_KEEP:]}
+        for old_backup in backups:
+            if old_backup not in keep:
+                try:
+                    old_backup.unlink()
+                except OSError:
+                    pass
         return backup
 
     @staticmethod

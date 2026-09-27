@@ -755,6 +755,18 @@ class LocalBehaviorTests(unittest.TestCase):
         self.assertNotIn("[warn]", listing.stdout)
         self.assertNotIn("[safe]", listing.stdout)
 
+    def test_backup_file_keeps_original_and_recent_nine(self):
+        target = Path(tempfile.mkdtemp()) / "conf"
+        target.write_text("current", encoding="utf-8")
+        for i in range(1, 12):
+            (target.parent / f"conf.yjl-tui.bak.202601{i:02d}0000").write_text(f"old{i}", encoding="utf-8")
+        backup = tui.TUI.backup_file(target)
+        backups = sorted(target.parent.glob("conf.yjl-tui.bak.*"))
+        self.assertEqual(len(backups), 10)
+        self.assertIn(backup, backups)
+        # 最老的一份（原始文件）始终保留，供 restore_tcp_file 恢复
+        self.assertEqual(backups[0].name, "conf.yjl-tui.bak.202601010000")
+
     def test_input_and_name_validation(self):
         self.assertTrue(tui.TUI.docker_name("nginx:latest", image=True))
         self.assertFalse(tui.TUI.docker_name("bad name"))
