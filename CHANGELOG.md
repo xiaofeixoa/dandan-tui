@@ -23,9 +23,6 @@
 
 - launch.sh 并发下载（最多 8 路，xargs -P）：慢网络下安装等待大幅缩短；
   任一下载失败立即中止，SHA256SUMS 校验兜底不变。
-
-- launch.sh 并发下载（最多 8 路，xargs -P）：慢网络下安装等待大幅缩短；
-  任一下载失败立即中止，SHA256SUMS 校验兜底不变。
 - `--doctor --net` 同时探测 launch.sh 本体的部署 URL。
 
 ### 诊断与 CI
