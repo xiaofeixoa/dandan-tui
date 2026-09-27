@@ -30,7 +30,7 @@ def bash_available() -> bool:
 def to_bash_path(path: Path) -> str:
     """Git Bash 下把 Windows 路径转成它喜欢的形式；Linux 原样返回。"""
     if os.name == "nt" and shutil.which("cygpath"):
-        result = subprocess.run(["cygpath", "-m", str(path)], capture_output=True, text=True)
+        result = subprocess.run(["cygpath", "-m", str(path)], capture_output=True, text=True, encoding="utf-8")
         if result.returncode == 0:
             return result.stdout.strip()
     return str(path)
@@ -54,7 +54,7 @@ class LaunchE2ETests(unittest.TestCase):
         env.update(extra_env or {})
         return subprocess.run(
             ["bash", to_bash_path(launcher_path), "--check"],
-            capture_output=True, text=True, env=env, cwd=str(ROOT), timeout=600,
+            capture_output=True, text=True, encoding="utf-8", env=env, cwd=str(ROOT), timeout=600,
         )
 
     def assert_installed_tree(self):

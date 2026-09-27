@@ -370,7 +370,7 @@ class ConfigSmokeTests(unittest.TestCase):
     @WINDOWS_CI_BASH_SUBPROCESS_SKIP
     def test_tcp_brutal_manager_validates_and_normalizes_ipv4_prefixes(self):
         script = "source scripts/tcp-brutal-manager.sh; normalize_prefix 188.165.226.219; normalize_prefix 1.2.3.4/24; ! normalize_prefix 1.2.3.999/32; ! normalize_prefix 1.2.3.4/33; is_rate 1000; ! is_rate 0"
-        result = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True)
+        result = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.splitlines(), ["188.165.226.219/32", "1.2.3.4/24"])
 
@@ -395,7 +395,7 @@ curl() {
 }
 run_online_install
 '''
-        result = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True)
+        result = subprocess.run(["bash", "-c", script], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertNotIn("unbound variable", result.stderr)
 
@@ -741,8 +741,8 @@ class LocalBehaviorTests(unittest.TestCase):
             "YJL_TUI_LOG_DIR": tempfile.mkdtemp(),
             "YJL_TUI_STATE_DIR": tempfile.mkdtemp(),
         }
-        check = subprocess.run(["bash", "./run.sh", "--check"], cwd=ROOT, env=env, capture_output=True, text=True)
-        listing = subprocess.run(["bash", "./run.sh", "--list"], cwd=ROOT, capture_output=True, text=True)
+        check = subprocess.run(["bash", "./run.sh", "--check"], cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8")
+        listing = subprocess.run(["bash", "./run.sh", "--list"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(check.returncode, 0)
         self.assertIn("配置 OK", check.stdout)
         self.assertEqual(listing.returncode, 0)
