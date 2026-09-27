@@ -100,8 +100,8 @@ class DoctorTests(unittest.TestCase):
                 {"id": "d", "category": "c", "title": "t", "description": "d", "kind": "builtin"},
             ])
             targets = doctor.collect_network_targets(app_dir=app)
-        # launch.sh 自身的部署 URL 始终在探测范围内（首位）
-        self.assertEqual(targets, [doctor.LAUNCH_URL, "https://a.example/y.sh", "https://z.example/x.sh"])
+        # launch.sh 自身的部署 URL 始终在探测范围内（排序稳定）
+        self.assertEqual(targets, ["https://a.example/y.sh", doctor.LAUNCH_URL, "https://z.example/x.sh"])
 
     def test_probe_urls_reports_ok_and_dead(self):
         import http.server
