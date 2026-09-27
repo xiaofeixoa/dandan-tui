@@ -160,13 +160,16 @@ def collect_checks(
     return results
 
 
+LAUNCH_URL = "https://raw.githubusercontent.com/xiaofeixoa/dandan-tui/main/launch.sh"
+
+
 def collect_network_targets(app_dir: Path | None = None) -> list[str]:
-    """从 scripts.json 收集所有 online / tcp_online 动作的去重 URL（排序稳定）。"""
+    """收集需要探测的部署关键 URL：launch.sh 本体 + 所有 online / tcp_online 动作 URL（去重排序）。"""
     app_dir = app_dir or APP_DIR
     try:
         data = json.loads((app_dir / "scripts.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return []
+        data = {}
     urls = {
         action["url"].strip()
         for action in data.get("actions", [])
@@ -174,6 +177,7 @@ def collect_network_targets(app_dir: Path | None = None) -> list[str]:
         and isinstance(action.get("url"), str)
         and action["url"].strip()
     }
+    urls.add(LAUNCH_URL)
     return sorted(urls)
 
 

@@ -106,10 +106,16 @@ acquire_files() {
         cp -a -- "${LOCAL_SOURCE}/${MANIFEST}" "${TEMP_DIR}/${MANIFEST}"
         return 0
     fi
-    download "$MANIFEST"
-    for entry in "${FILES[@]}"; do
-        download "${entry%%|*}"
-    done
+    # 并发下载（最多 8 路）：慢网络下显著缩短安装等待。
+    # 并发子 shell 需要这些变量与函数；本地复制的 cp 分支不经过这里。
+    export -f download
+    export BASE_URL CACHE_BUSTER TEMP_DIR
+    { printf '%s\n' "$MANIFEST"
+      for entry in "${FILES[@]}"; do printf '%s\n' "${entry%%|*}"; done
+    } | if ! xargs -P 8 -n 1 bash -c 'download "$1"' _; then
+        printf '%s\n' '错误：部分文件下载失败，请重试。' >&2
+        exit 1
+    fi
 }
 
 verify_downloads() {

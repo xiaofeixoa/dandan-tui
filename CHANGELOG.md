@@ -19,6 +19,12 @@
 - 全量审计 62 个 online 动作的交互形态并以
   `test_online_actions_declare_interaction_model` 固化，未声明的新动作会被 CI 拒绝。
 
+### 安装性能
+
+- launch.sh 并发下载（最多 8 路，xargs -P）：慢网络下安装等待大幅缩短；
+  任一下载失败立即中止，SHA256SUMS 校验兜底不变。
+- `--doctor --net` 同时探测 launch.sh 本体的部署 URL。
+
 ### 诊断与 CI
 
 - `--doctor --net`：并发探测全部 online/tcp_online 动作 URL 可达性，
