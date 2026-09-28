@@ -33,6 +33,11 @@ jobs:
             bash -n "$file"
           done < <(git ls-files '*.sh')
 
+      - name: flake8 static sweep (self-maintained Python; F rules honor # noqa)
+        run: |
+          python -m pip install --quiet flake8
+          python -m flake8 --select=F tui.py yjl_tui tests kernel_manager.py nginx_manager.py singbox_manager.py
+
       - name: Verify launch.sh SHA256SUMS is up to date
         run: bash scripts/check-launch-manifest.sh
 

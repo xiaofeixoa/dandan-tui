@@ -1699,7 +1699,7 @@ class TUI:
         print("目标系统：")
         for key, (_, label, _) in systems.items():
             print(f"  {key}. {label}")
-        print(f"  7. 自定义（手动输入该脚本的完整参数）")
+        print("  7. 自定义（手动输入该脚本的完整参数）")
         choice = input("选择 [1]: ").strip() or "1"
         if choice == "7":
             raw = input("输入完整参数：").strip()

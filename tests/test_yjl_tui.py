@@ -75,6 +75,7 @@ class DispatchTests(unittest.TestCase):
                 {"id": "tcpfit", "kind": "local_script", "path": "scripts/tcpfit/tcpfit.sh", "title": "t"},
                 self.log,
             )
+        local_script.assert_called_once()
         repair.assert_not_called()
         self.assertEqual(rc, 0)
 
